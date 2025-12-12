@@ -1,3 +1,28 @@
+$(document).ready(function () {
+    let typingTimer;
+    const delay = 400;
+    const $input = $('#search-input');
+console.log('delay comes here:');
+    console.log(delay);
+    $input.on('keyup', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () {
+            let search = $input.val();
+
+            $.ajax({
+                url: asset + 'stores',
+                type: 'GET',
+                data: { search: search },
+                success: function (res) {
+                    $('#results').html(res.html);
+                },
+                error: function () {
+                    $('#results').html('<h3 class="text-center text-danger py-5">Error fetching results.</h3>');
+                }
+            });
+        }, delay);
+    });
+});
 jQuery(document).ready(function () {
 
 
@@ -2697,7 +2722,7 @@ jQuery('.pro-slider-thumb').slick({
 
                         jQuery('.add-address').show()
 
-                        jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"]').intlTelInput({
+                        jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"],input[name="meta[vendor_phone]').intlTelInput({
                             initialCountry: "ae",
                             nationalMode: false,
                             autoInsertDialCode: true,
@@ -2933,7 +2958,7 @@ jQuery('.pro-slider-thumb').slick({
 
                 jQuery('.add_form_address').prepend(response)
 
-                jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"]').intlTelInput({
+                jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"],input[name="meta[vendor_phone]').intlTelInput({
                     initialCountry: "ae",
                     nationalMode: false,
                     autoInsertDialCode: true,
@@ -3037,8 +3062,8 @@ jQuery('.pro-slider-thumb').slick({
             headers: { 'X-CSRF-TOKEN': token },
 
             success: function (response) {
-
-                jQuery('.cart-icon small').text(response);
+console.log('showing in response');
+jQuery('.cart-icon .small').text(response);
 
             }
 
@@ -3424,7 +3449,7 @@ jQuery('.pro-slider-thumb').slick({
 
 
 
-    jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"]').intlTelInput({
+    jQuery('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"],input[name="meta[vendor_phone]').intlTelInput({
         initialCountry: "ae",
         nationalMode: false,
         autoInsertDialCode: true,
@@ -3452,7 +3477,7 @@ jQuery('.pro-slider-thumb').slick({
     })
 
 
-    jQuery('body').delegate('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"]', 'keyup focus blur', function (e) {
+    jQuery('body').delegate('input[name="Phone"], input[name="phone"], input[name="number"], input[type="phone"], input[name="meta[vendor_phone]"]', 'keyup focus blur', function (e) {
 
         dis = jQuery(this)
 
@@ -4852,5 +4877,6 @@ if (match.length) {
         });
     });
 });
+
 
 

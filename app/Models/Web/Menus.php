@@ -10,7 +10,6 @@ class Menus extends Model{
     protected $table = 'menus';
 
     public static function getMenu($type = 'main'){
-
         $menus = self::where([['parent_id',0],['menu',$type]])->orderBy('sort_order','asc')->where('status','1')->get();
 
         $menus ? $menus = $menus->toArray() : '';

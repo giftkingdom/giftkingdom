@@ -42,6 +42,7 @@
 						$c3 = $key == 0 ? '' : 'false';?>
 
 						<div class="accordion-item border-0">
+							@if(isset($faq['metadata']['pagetitle']) || isset($faq['post_title']))
 							<h2 class="accordion-header">
 								<button class="accordion-button justify-content-between align-items-center px-2 <?=$c1?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?=$key?>" aria-expanded="<?=$c3?>" aria-controls="collapse<?=$key?>">
 
@@ -50,7 +51,8 @@
 									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.99976 8.9998L11.9998 14.9998L17.9998 8.99976" stroke="#6D7D36" stroke-miterlimit="16"/></svg>
 								</button>
 							</h2>
-
+@endif
+@if(isset($faq['metadata']['post_content']) || isset($faq['post_content']))
 							<div id="collapse<?=$key?>" class="accordion-collapse collapse <?=$c2?>"
 								data-bs-parent="#home-section-five-accordion">
 								<div class="accordion-body px-2">
@@ -61,6 +63,7 @@
 									</div>
 								</div>
 							</div>
+							@endif
 						</div>
 
 					<?php endforeach;?>

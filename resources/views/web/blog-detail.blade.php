@@ -50,21 +50,24 @@
 
 					<a href="<?=asset('blog/'.$blog['post_name'])?>" class="d-block">
 						<article>
-
+@if(isset($img))
 							<figure class="overflow-hidden">
 
 								<img src="<?=asset($img)?>" alt="*" class="w-100 wow">
 
 							</figure>
-
+@endif
 							<article class="mt-3">
 
+								@if(isset($blog['cat']))
 								<span class="d-flex gap-3"><?=$blog['cat']?> | <?=date('M,d,y',strtotime($blog['created_at']))?></span>
-
+@endif
+@if(isset($blog['metadata']['pagetitle']) || isset($post['post_title']))
 								<h5 class="my-3"><?=$blog['metadata']['pagetitle'] ?? $blog['post_title']?></h5>
-
+@endif
+@if(isset($blog['metadata']['post_excerpt']) || isset($blog['post_excerpt']))
 								<?=$blog['metadata']['post_excerpt'] ?? $blog['post_excerpt']?>
-
+@endif
 
 							</article>
 

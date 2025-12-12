@@ -44,7 +44,9 @@
                                                 <th>Email</th>
                                                 <th>Subject</th>
                                                 <th>Message</th>
+                                                @if(Auth::check() && Auth::user()->role_id != 4)
                                                 <th>Support Category</th>
+                                                @endif
                                                 <th>Received Date</th>
                                                 <th>Action</th>
                                             </tr>

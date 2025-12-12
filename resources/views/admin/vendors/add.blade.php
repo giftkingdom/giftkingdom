@@ -48,7 +48,7 @@
 
             <div class="box-body">
 
-                <div class="row">
+                <div class="row mb-3">
 
                     <h2 class="mt-3">User Data</h2>
 
@@ -127,7 +127,7 @@
 
                     <h2 class="mt-3">Vendor Data</h2>
 
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
 
                         <div class="form-group">
 
@@ -137,9 +137,9 @@
 
                         </div>
 
-                    </div>
+                    </div> -->
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group">
 
@@ -151,7 +151,7 @@
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group">
 
@@ -200,7 +200,7 @@
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group mt-3">
 
@@ -213,7 +213,7 @@
                     </div>
 
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group mt-3">
 
@@ -229,31 +229,7 @@
 
                     </div>
                     
-                    <div class="col-md-4"></div>
-
-                    <div class="col-md-4">
-
-                        <div class="form-group mt-3">
-
-                            <label for="banner_image" class="control-label mb-1">Banner Image</label>
-
-                            <div class="featuredWrap">
-
-                                <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
-
-                                <input type="hidden" id="banner_image" 
-
-                                name="meta[store_image]" required>
-
-                                <img src="" alt="featured_image" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group mt-3">
 
@@ -275,44 +251,21 @@
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <div class="form-group mt-3">
 
-                            <label for="store_featured_image" class="control-label mb-1">Featured Image</label>
+                            <label for="featured_image" class="control-label mb-1">Featured Image</label>
 
                             <div class="featuredWrap">
 
                                 <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
 
-                                <input type="hidden" id="store_featured_image" 
+                                <input type="hidden" id="featured_image" 
 
-                                name="meta[store_featured_image]" value="" required>
+                                name="meta[featured_image]" value="" required>
 
-                                <img src="" alt="store_featured_image" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <div class="form-group mt-3">
-
-                            <label for="license_registration" class="control-label mb-1">Trade License or Commercial Registration</label>
-
-                            <div class="featuredWrap">
-
-                                <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
-
-                                <input type="hidden" id="license_registration" 
-
-                                name="meta[license_registration]" value="" required>
-
-                                <img src="" alt="license_registration" class="w-100 d-none">
+                                <img src="" alt="featured_image" class="w-100 d-none">
 
                             </div>
 
@@ -320,93 +273,42 @@
 
                     </div>
 
-                    <div class="col-md-4">
 
-                        <div class="form-group mt-3">
+<div class="col-md-4">
+    <div class="form-group mt-3">
+        <label for="license_registration" class="control-label mb-1">Trade License or Commercial Registration</label>
+        <input type="file" id="license_registration" name="meta[license_registration]" accept=".pdf" required class="form-control">
+    </div>
+</div>
 
-                            <label for="vat_registration" class="control-label mb-1">VAT Registration Certificate</label>
+<div class="col-md-4">
+    <div class="form-group mt-3">
+        <label for="vat_registration" class="control-label mb-1">VAT Registration Certificate</label>
+        <input type="file" id="vat_registration" name="meta[vat_registration]" accept=".pdf" required class="form-control">
+    </div>
+</div>
 
-                            <div class="featuredWrap">
+<div class="col-md-4">
+    <div class="form-group mt-3">
+        <label for="residence_id" class="control-label mb-1">Residence ID or Passport of the legal signatory</label>
+        <input type="file" id="residence_id" name="meta[residence_id]" accept=".pdf" required class="form-control" multiple>
+    </div>
+</div>
 
-                                <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
+<div class="col-md-4">
+    <div class="form-group mt-3">
+        <label for="residence_visa" class="control-label mb-1">Residence Visa</label>
+        <input type="file" id="residence_visa" name="meta[residence_visa]" accept=".pdf" required class="form-control">
+    </div>
+</div>
 
-                                <input type="hidden" id="vat_registration" 
+<div class="col-md-4">
+    <div class="form-group mt-3">
+        <label for="bank_confirmation" class="control-label mb-1">Bank Account Confirmation</label>
+        <input type="file" id="bank_confirmation" name="meta[bank_confirmation]" accept=".pdf" required class="form-control">
+    </div>
+</div>
 
-                                name="meta[vat_registration]" value="" required>
-
-                                <img src="" alt="vat_registration" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <div class="form-group mt-3">
-
-                            <label for="residence_id" class="control-label mb-1">Residence ID or Passport of the legal signatory</label>
-
-                            <div class="featuredWrap">
-
-                                <button class="btn uploader featured_image btn-primary" data-type="multiple">+</button>
-
-                                <input type="hidden" id="residence_id" 
-
-                                name="meta[residence_id]" value="" required>
-
-                                <img src="" alt="residence_id" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <div class="form-group mt-3">
-
-                            <label for="residence_visa" class="control-label mb-1">Residence Visa</label>
-
-                            <div class="featuredWrap">
-
-                                <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
-
-                                <input type="hidden" id="residence_visa" 
-
-                                name="meta[residence_visa]" value="" required>
-
-                                <img src="" alt="residence_visa" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <div class="form-group mt-3">
-
-                            <label for="bank_confirmation" class="control-label mb-1">Bank Account Confirmation</label>
-
-                            <div class="featuredWrap">
-
-                                <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
-
-                                <input type="hidden" id="bank_confirmation" 
-
-                                name="meta[bank_confirmation]" value="" required>
-
-                                <img src="" alt="bank_confirmation" class="w-100 d-none">
-
-                            </div>
-
-                        </div>
-
-                    </div>
 
                 </div>
 

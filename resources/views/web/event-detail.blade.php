@@ -138,11 +138,13 @@
 
 												@foreach($data['events'] as $item)
 												@if($item['post_title'] !== $data['post_data']['post_title'])
+												@if(isset($item['post_title']) || isset($item['metadata']))
 												<li>
 													<a href="javascript:;" class="dropdown_select" value="{{ $item['post_title'] }}">
 														<?=$item['metadata']['pagetitle'] ?? $item['post_title']?>
 													</a>
 												</li>
+												@endif
 												@endif
 												@endforeach
 												<li>

@@ -58,7 +58,20 @@
 
             <div class="row pdata">
 
-                <div class="col-md-4">
+                                                        <div class="form-group">
+
+
+
+                                                            <label for="name" class="control-label mb-1">Title</label>
+
+
+                                                            <input type="text" name="var_prod_title" class="form-control var_prod_title_en">
+                                                            <input type="text" style="display: none" name="var_prod_title_ar" class="form-control var_prod_title_ar">
+
+
+
+                                                        </div>
+                <div class="col-md-4 mt-3">
 
                     <div class="form-group">
 
@@ -70,7 +83,7 @@
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 mt-3">
 
                     <div class="form-group">
 
@@ -82,7 +95,7 @@
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 mt-3">
 
                     <div class="form-group">
 

@@ -297,7 +297,7 @@ $('body').on('click', '#address_form button[type="submit"]', function(e) {
           $('.add_form_address').html(response.html);
           $('.add-address').show();
 
-          $('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"]').intlTelInput({
+          $('input[name="Phone"],input[name="phone"],input[name="number"],input[type="phone"],input[name="meta[vendor_phone]"]').intlTelInput({
             initialCountry: "ae",
             nationalMode: false,
             autoInsertDialCode: true,
@@ -326,9 +326,9 @@ $('body').on('click', '#address_form button[type="submit"]', function(e) {
 
         if (dis.hasClass('signin')) {
           if (response.message.includes('Successfully')) {
-            localStorage.setItem('authenticated_gift_kingdom', JSON.stringify({ id: data.get('email_phone') }));
+            localStorage.setItem('authenticated_giftkingdom', JSON.stringify({ id: data.get('email_phone') }));
           } else {
-            localStorage.removeItem('authenticated_gift_kingdom');
+            localStorage.removeItem('authenticated_giftkingdom');
           }
         }
 

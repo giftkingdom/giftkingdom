@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Exception;
 use App\Models\Core\Images;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Hash;
 use Auth;
 use ZipArchive;
@@ -79,6 +79,10 @@ class AdminController extends Controller
 					</button>
 					<div class="dropdown-menu2 dropdown-menu-right" style="display: none;">
 						<ul class="careerFilterInr">
+						<li><a href="' . asset('admin/editaccess/' . $admin->id) . '">Edit Access
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15">
+																			<path d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z" />
+																		</svg></a></li>
 							<li><a href="' . asset('admin/editadmin/' . $admin->id) . '">Edit
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15">
 																			<path d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z" />
@@ -208,47 +212,50 @@ class AdminController extends Controller
 	}
 
 	//login function
-	public function checkLogin(Request $request)
-	{
-		$validator = Validator::make(
-			array(
-				'email'    => $request->email,
-				'password' => $request->password
-			),
-			array(
-				'email'    => 'required | email',
-				'password' => 'required',
-			)
-		);
-		//check validation
-		if ($validator->fails()) {
-			return redirect('admin/login')->withErrors($validator)->withInput();
-		} else {
-			$user = DB::table('users')->where('email', $request->email)->first();
+public function checkLogin(Request $request)
+{
+    $validator = Validator::make(
+        [
+            'email'    => $request->email,
+            'password' => $request->password,
+        ],
+        [
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]
+    );
 
-			if ($user) {
-				if ($user->status == 0) {
-					return redirect('admin/login')->with('loginError', Lang::get("Your Account Is Deactivated"));
-				}
+    if ($validator->fails()) {
+        return redirect('admin/login')->withErrors($validator)->withInput();
+    }
 
-				//check authentication of email and password
-				$adminInfo = array("email" => $request->email, "password" => $request->password);
+    $user = DB::table('users')->where('email', $request->email)->first();
 
-				if (auth()->attempt($adminInfo)) {
-					$admin = auth()->user();
+    if (!$user) {
+        return redirect('admin/login')->with('loginError', Lang::get("labels.EmailPasswordIncorrectText"));
+    }
 
-					$administrators = DB::table('users')->where('id', $admin->myid)->get();
+    if ($user->status == 0) {
+        return redirect('admin/login')->with('loginError', Lang::get("Your Account Is Deactivated"));
+    }
 
-					if ($user->id == 223) {
-						return redirect()->intended('admin/orders/display/')->with('administrators', $administrators);
-					}
-					return redirect()->intended('admin/dashboard/')->with('administrators', $administrators);
-				}
-			} else {
-				return redirect('admin/login')->with('loginError', Lang::get("labels.EmailPasswordIncorrectText"));
-			}
-		}
-	}
+    $adminInfo = ["email" => $request->email, "password" => $request->password];
+
+    if (auth()->attempt($adminInfo)) {
+        $admin = auth()->user();
+        $administrators = DB::table('users')->where('id', $admin->myid)->get();
+
+        if ($user->id == 223) {
+            return redirect()->intended('admin/orders/display/')->with('administrators', $administrators);
+        }
+
+        return redirect()->intended('admin/dashboard/')->with('administrators', $administrators);
+    }
+
+    // fallback for wrong password
+    return redirect('admin/login')->with('loginError', Lang::get("labels.EmailPasswordIncorrectText"));
+}
+
 
 	//logout
 	public function logout()
@@ -350,7 +357,6 @@ class AdminController extends Controller
 
 		$messages = [
 			'email.unique'   => 'The email address is already registered.',
-			'phone.regex'    => 'Please enter a valid UAE mobile number (e.g., 0501234567).',
 			'password.min'   => 'Password must be at least 6 characters.',
 			'email.email'    => 'Please enter a valid email address.',
 			'email.required' => 'Email is required.',
@@ -362,7 +368,6 @@ class AdminController extends Controller
 			'first_name' => 'required|string|max:100',
 			'last_name'  => 'required|string|max:100',
 			'email'      => 'required|email|unique:users,email',
-			'phone'      => ['required', 'regex:/^05[0-9]{8}$/'],
 			'password'   => 'required|min:6',
 		], $messages);
 
@@ -438,7 +443,7 @@ class AdminController extends Controller
 
 		Users::where('id', $data['id'])->update($data);
 
-		return redirect()->back()->with('message', 'Record Updated Successfully!');
+		return redirect()->back()->with('success', 'Record Updated Successfully!');
 	}
 
 	public function updatepassword(Request $request)
@@ -458,10 +463,12 @@ class AdminController extends Controller
 	}
 
 
-	public function editAccess(Request $request)
+	public function editAccess(Request $request, $id)
 	{
 
-		$arr = Setting::where('name', 'admin_access')->pluck('value')->first();
+		$user = Users::where('id', $id)->first();
+		$result['user'] = $user;
+		$arr = Usermeta::where('user_id', $id)->where('meta_key', 'access')->pluck('meta_value')->first();
 
 		$result['arr'] = unserialize($arr);
 
@@ -484,6 +491,7 @@ class AdminController extends Controller
 			"events",
 			"reasons",
 			"coupons",
+			"abandoned-cart",
 			"categories",
 			"brands",
 			"attributes",
@@ -495,6 +503,7 @@ class AdminController extends Controller
 			"out-of-stock-products",
 			"customers-order-total",
 			"sales-report",
+			"vendors",
 			"customers",
 			"customer-wallet",
 			"currency",
@@ -508,15 +517,26 @@ class AdminController extends Controller
 		return view("admin.admins.access", ['pageTitle' => 'Admins'])->with('data', $result);
 	}
 
-	public function updateAccess(Request $request)
+	public function updateAccess(Request $request, $id)
 	{
 
 		$data = $request->all();
 		unset($data['_token']);
 
 		$arr = serialize($data);
+$meta = Usermeta::where('user_id', $id)
+                ->where('meta_key', 'access')
+                ->first();
 
-		Setting::where('name', 'admin_access')->update(['value' => $arr]);
+if ($meta) {
+    $meta->update(['meta_value' => $arr]);
+} else {
+    Usermeta::create([
+        'user_id' => $id,
+        'meta_key' => 'access',
+        'meta_value' => $arr,
+    ]);
+}
 
 		return redirect()->back()->with('success', 'Access Updated Successfully!');
 	}
@@ -542,13 +562,13 @@ class AdminController extends Controller
 	public function ContactDelete(Request $request)
 	{
 
-	DB::table('inquiry')->where('id', $request->id)->delete();
+		DB::table('inquiry')->where('id', $request->id)->delete();
 
 		return redirect()->back();
 	}
 	public function EventInquiryDelete(Request $request)
 	{
- DB::table('event_inquiries')->where('id', $request->id)->delete();
+		DB::table('event_inquiries')->where('id', $request->id)->delete();
 
 		return redirect()->back();
 	}
@@ -558,8 +578,11 @@ class AdminController extends Controller
 		$start = (int) $request->input('start', 0);
 		$draw = (int) $request->input('draw');
 		$search = $request->input('search.value');
-
-		$query = DB::table('inquiry')->orderBy('created_at', 'desc');
+		if (Auth::user()->role_id == 4) {
+			$query = DB::table('inquiry')->where('vendor_id', Auth::user()->id)->orderBy('created_at', 'desc');
+		} else {
+			$query = DB::table('inquiry')->where('vendor_id', null)->orderBy('created_at', 'desc');
+		}
 
 		if (!empty($search)) {
 			$query->where(function ($q) use ($search) {
@@ -637,10 +660,10 @@ class AdminController extends Controller
 			->limit($perPage)
 			->get();
 
-$formatted = $inquiries->map(function ($item, $index) use ($start) {
-	$deleteUrl = asset('admin/event-inquiry-delete');
+		$formatted = $inquiries->map(function ($item, $index) use ($start) {
+			$deleteUrl = asset('admin/event-inquiry-delete');
 
-	$viewButton = '<button type="button" class="btn btn-sm viewEventDetails"
+			$viewButton = '<button type="button" class="btn btn-sm viewEventDetails"
 		data-name="' . e($item->name) . '"
 		data-email="' . e($item->email) . '"
 		data-event="' . e($item->event) . '"
@@ -652,27 +675,27 @@ $formatted = $inquiries->map(function ($item, $index) use ($start) {
 		<i class="fa fa-eye" aria-hidden="true"></i>
 	</button>';
 
-	$deleteButton = '<a href="javascript:delete_popup(\'' . $deleteUrl . '\', ' . $item->id . ');" class="badge delete-popup bg-red">
+			$deleteButton = '<a href="javascript:delete_popup(\'' . $deleteUrl . '\', ' . $item->id . ');" class="badge delete-popup bg-red">
 		<i class="fa fa-trash" aria-hidden="true"></i>
 	</a>';
 
-	return [
-						'select' => '<input type="checkbox" class="row-select" data-id="' . $item->id . '">',
+			return [
+				'select' => '<input type="checkbox" class="row-select" data-id="' . $item->id . '">',
 
-		'serial' => $start + $index + 1,
-		'name' => $item->name,
-		'email' => $item->email,
-		'event' => $item->event,
-		'received_date' => date('d-m-Y', strtotime($item->created_at)),
-		'event_date' => date('d-m-Y', strtotime($item->event_date)),
-		'action' => $viewButton . ' ' . $deleteButton,
+				'serial' => $start + $index + 1,
+				'name' => $item->name,
+				'email' => $item->email,
+				'event' => $item->event,
+				'received_date' => date('d-m-Y', strtotime($item->created_at)),
+				'event_date' => date('d-m-Y', strtotime($item->event_date)),
+				'action' => $viewButton . ' ' . $deleteButton,
 
-		// 👇 Add these hidden fields for exporting
-		'phone' => $item->phone ?? '-',
-		'guest_count' => $item->guest_count ?? '-',
-		'message' => $item->message ?? '-',
-	];
-})->all();
+				// 👇 Add these hidden fields for exporting
+				'phone' => $item->phone ?? '-',
+				'guest_count' => $item->guest_count ?? '-',
+				'message' => $item->message ?? '-',
+			];
+		})->all();
 
 
 

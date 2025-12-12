@@ -93,7 +93,7 @@
 
                                 <label for="name" class="control-label mb-1">Title</label>
 
-                                <input type="text" name="pagetitle" class="pagetitle form-control" value="<?= $data['post_data']['post_title'] ?>" required>
+                                <input type="text" name="pagetitle" class="pagetitle form-control required" value="<?= $data['post_data']['post_title'] ?>">
 
                             </div>
 
@@ -132,11 +132,11 @@
 
                             </div>
 
-                            <div class="form-group d-none mt-3">
+                            <div class="form-group mt-3">
 
                                 <label for="name" class="control-label mb-1">Slug</label>
 
-                                <input type="text" name="slug" value="<?= $data['post_data']['post_name'] ?>" class="form-control" required>
+                                <input type="text" name="slug" value="<?= $data['post_data']['post_name'] ?>" class="form-control required">
 
                             </div>
 
@@ -217,6 +217,7 @@
 
                             <input type="hidden" name="terms" value="<?= $termslug ?>">
 
+@if($data['post_data']['post_type'] != 'faqs' && $data['post_data']['post_type'] != 'reasons')
 
                             <?php
 
@@ -242,7 +243,7 @@
                                 </div>
 
                             </div>
-
+@endif
                             <div class="form-group mt-3">
 
                                 <div class="form-group">
@@ -275,7 +276,7 @@
 
                                     <label for="name" class="control-label mb-1">Content</label>
 
-                                    <textarea class="quilleditor" name="post_content" height="678">
+                                    <textarea class="quilleditor @if(!empty($data['post_type']) && $data['post_data']['post_type'] === 'blogs' || $data['post_data']['post_type'] === 'faqs')required @endif" name="post_content" height="678">
 
                                         <?php
 

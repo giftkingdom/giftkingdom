@@ -230,7 +230,6 @@ public function getPagesAjax(Request $request)
     /*------------------------------------------------ Status Web Pages -----------------------------------------*/
     public function pageWebStatus(Request $request)
     {
-        dd('pageWebStatus controller');
         Pages::pageWebStatus($request);
         return redirect()->back()->withErrors([Lang::get("labels.PageStatusMessage")]);
     }

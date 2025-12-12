@@ -24,83 +24,37 @@ class Products extends Model{
 	protected $table= 'products';
 
 	protected $guarded = [];
+public static function checkSlug($slug, $id = '')
+{
+    if ($slug == '') {
+        return '';
+    }
 
-	public static function checkSlug($slug,$id=''){
+    $slug = str_replace([',', '.'], '', $slug);
+    $slug = rtrim($slug, '-');
 
-		if( $slug != '' ) :
+    $check = self::where('prod_slug', 'like', $slug . '%')->get();
 
-			$slug = str_replace([',','.'],'',$slug );
+    $existingNumbers = [];
 
-			$parsedslug = $slug;
+    foreach ($check as $checking) {
+        if (preg_match('/^(.*?)-(\d+)$/', $checking->prod_slug, $matches)) {
+            $existingNumbers[] = (int) $matches[2];
+        } else {
+            if ($checking->prod_slug === $slug && ($id == '' || $checking->id != $id)) {
+                $existingNumbers[] = 0;
+            }
+        }
+    }
 
-			$append = '';
+    if (empty($existingNumbers)) {
+        return $slug;
+    }
 
-			$strcheck = substr($slug,-1);
+    $next = max($existingNumbers) + 1;
+    return $slug . '-' . $next;
+}
 
-			if( $strcheck == '-' ) :
-
-				$slug = rtrim($slug,'-');
-
-			endif;
-
-			$check = self::where([
-
-				['prod_slug','like', '%'.$slug.'%']
-
-			])->get();
-
-			$slugarr = [];
-
-			$checkslug = [];
-
-			foreach( $check as $checking ) :
-
-				$ending = substr( $checking->post_name, -7 );
-
-				$int = (int)filter_var( $ending, FILTER_SANITIZE_NUMBER_INT);
-
-				array_push($checkslug, $int);
-
-			endforeach;
-
-			foreach( $check as $checking ) :
-
-				if( $id == '' ) :
-
-					if( $checking->post_name === $slug )  :
-
-						$ending = substr( $checking->post_name, -7 );
-
-						$int = (int)filter_var( $ending, FILTER_SANITIZE_NUMBER_INT);
-
-						$parsedslug = str_replace( abs($int) , '' , $slug ).( abs( max($checkslug) + 1 ) ) ;
-
-					endif;
-
-				else :
-
-					if( $checking->post_name === $slug && $checking->ID != $id )  :
-
-						$ending = substr( $checking->post_name, -7 );
-
-						$int = (int)filter_var( $ending, FILTER_SANITIZE_NUMBER_INT);
-
-						$parsedslug = str_replace( abs($int) , '' , $slug ).( abs( max($checkslug) + 1 ) ) ;
-
-					endif;
-
-				endif;
-
-			endforeach;
-
-			return $parsedslug;
-
-		else :
-
-			return '';
-
-		endif;
-	}
 
 	public static function deductQuantity($id, $quantity) {
 		DB::table('products')
@@ -255,7 +209,7 @@ class Products extends Model{
 				!str_contains( $data['prod_images'], ',') ? $data['prod_images'].=',' : '';
 				self::where('ID',$data['update'])->update([
 
-					'prod_title' => $data['prod_title'],
+					'prod_title' => $data['prod_title'] ?? null,
 					'prod_title_ar' => $data['prod_title_ar'] ?? null,
 
 					'prod_sku' => $data['sku'],

@@ -136,7 +136,7 @@ class CustomersController extends Controller
 
                     ]);
 
-                    $message = $data['firstname'] . IndexController::trans_labels('has been registered!');
+                    $message = $data['firstname'] . ' ' . IndexController::trans_labels('has been registered!');
 
                     $settings = Setting::commonContent();
 
@@ -224,26 +224,31 @@ class CustomersController extends Controller
         }
     }
 
-    public function resetEmail(Request $request)
-    {
+    public function resetEmail(Request $request){
 
-        $check = Users::where('email', $request->email)->first();
+        $check = Users::where('email',$request->email)->first();
 
-        if ($check) :
+        if( $check ) :
+            $response = Mail::send('mail.forgot',['title' => 'Forgot','data' => $check], function($message) use($request){
 
-            $response = true;
+                $settings = Setting::commonContent();
 
-            if ($response) :
+                $message->from($settings['setting']['email'],$settings['setting']['site-name'])->to( $request->email, $settings['setting']['site-name'])
+                ->subject($settings['setting']['site-name'].' | Password Reset!');
+
+            });
+
+            if ($response ) :
 
                 $message = 'Email Sent Successfully!';
 
-                echo json_encode(['message' => $message, 'redirect' => '', 'status' => true]);
+                echo json_encode(['message'=> $message,'redirect' => '' , 'status' => true]);
 
                 $status = 'sent';
 
             else :
 
-                echo json_encode(['message' => 'Please Try Again!', 'redirect' => '', 'status' => false]);
+                echo json_encode(['message'=>'Please Try Again!','redirect' => '' , 'status' => false]);
 
                 $status = 'failed';
 
@@ -253,9 +258,10 @@ class CustomersController extends Controller
 
             $status = 'failed';
 
-            echo json_encode(['message' => 'User does not exist!', 'redirect' => '', 'status' => false]);
+            echo json_encode(['message'=>'User does not exist!','redirect' => '' , 'status' => false]);
 
         endif;
+
     }
 
     public function authenticate(Request $request)
@@ -1053,10 +1059,12 @@ $data['content'] = IndexController::parseContent($content->toArray());
         return view('web.account.forgot', ['title' => 'Forgot Password']);
     }
 
-    public function resetPassword(Request $request)
-    {
+    public function resetPassword(Request $request){
+if(Auth::check()){
+    return redirect('/');
+}
+        return view('web.account.reset',['title' => 'Rest Password']);
 
-        return view('web.account.reset', ['title' => 'Reset Password']);
     }
 
     public function reset(Request $request)
@@ -1243,4 +1251,74 @@ $data['content'] = IndexController::parseContent($content->toArray());
 
         return response()->json(['view' => $view]);
     }
+
+    public function becomeSeller(Request $request){
+
+    $result = Users::getUserData();
+
+    return view('web.account.becomeseller',['title' => 'Become A Vendor'])->with('result',$result);
+
+}
+
+public function updateVendor(Request $request){
+
+    $data = $request->all();
+
+    $role = Auth()->user()->role_id == 1 ? 1 : 4;
+    
+
+    User::where('id', Auth::user()->id)->update(['role_id' => $role ]);
+
+    if( isset( $data['meta']['files'] ) ) :
+
+        $files = $data['meta']['files']; unset($data['meta']['files']);
+
+        $files = array_filter($files);
+
+        foreach($files as $key => $value ):
+
+            if( $key == 'residence_id' ) :
+
+                $arr = [];
+
+                foreach( $value as $subitem ) :
+
+                    $arr[] = MediaController::mediaUpload($subitem);
+
+                endforeach;
+
+$data['meta'][$key] = implode(',', $arr);
+
+            else :
+
+                $data['meta'][$key] = MediaController::mediaUpload($value);
+
+            endif;
+
+        endforeach;
+
+    endif;
+
+    if( isset( $data['meta'] ) ) :
+
+        $data['meta'] = array_filter($data['meta']);
+        
+        foreach($data['meta'] as $key => $val ) :
+
+            Usermeta::updateOrCreate(['meta_key' => $key,'user_id' => Auth()->user()->id],[
+
+                'user_id' => Auth()->user()->id,
+                'meta_key' => $key,
+                'meta_value' => $val
+            ]);
+
+        endforeach;
+
+    endif;
+    
+    $message = $role == 4 || $role == 1 ? 'Vendor Updated!' : 'Vendor Application Submitted!';
+
+    return redirect()->back()->with('message', $message );
+
+}
 }

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use App\Models\Core\Setting;
 use App\Models\Core\Megamenu;
 use Lang;
+use DB;
 
 class MenusController extends Controller
 {
@@ -158,12 +159,45 @@ class MenusController extends Controller
     /*------------------------------------------------Add New Menus-----------------------------------------*/
     public function addnewmenu(Request $request)
     {
-        $title = array('pageTitle' => Lang::get("labels.AddMenu"));
-        Menus::addnewmenu($request);  
         $result['commonContent'] = $this->Setting->commonContent();
 
-        $message = Lang::get("labels.MenuAddedMessage");
-        return redirect()->back()->withErrors([$message]);
+        $title = array('pageTitle' => Lang::get("labels.AddMenu"));
+            $order = DB::table('menus')->max('sort_order') + 1;
+
+    if ($request->type == 2) {
+        $category = Categories::where('category_ID', $request->category)->first();
+        $slug = $category ? $category->categories_slug : null;
+
+        $link = asset('shop/category/') . '/' . $slug;
+
+    } else {
+        $link = $request->external_link  ?? $request->link;
+    }
+$alreadyExists = DB::table('menus')->where('menu', $request->menu)->where('link', $link)->first();
+if($alreadyExists){
+    return redirect()->back()->with('success','Menu Already Exists');
+}else{
+    $arr = [
+        'parent_id' => 0,
+        'type' => $request->type,
+        'status' => $request->status,
+        'menu_title' => $request->menuName_1,
+        'external_link' => $link,
+        'link' => $link,
+        'menu' => $request->menu,
+        'sort_order' => $order
+    ];
+    $menu_id = DB::table('menus')->insertGetId($arr);
+
+    return redirect()->back()->with('success','Menu Added Successfully');
+}
+
+    if ($request->type == 2) {
+        $arr['page_id'] = $request->category;
+    }
+
+
+
     }
 
     /*------------------------------------------------Edit Menus-----------------------------------------*/

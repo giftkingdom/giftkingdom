@@ -126,6 +126,7 @@
                             </div>
 
                             @endforeach
+@if($data['post_data']['post_type'] != 'faqs' && $data['post_data']['post_type'] != 'reasons')
 
 
                             <input type="hidden" name="terms" value="<?=$termslug?>">
@@ -155,7 +156,7 @@
                                 </div>
 
                             </div>
-
+@endif
                             <div class="form-group mt-3">
 
                                 <div class="form-group">

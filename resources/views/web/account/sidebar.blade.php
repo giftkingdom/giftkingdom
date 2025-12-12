@@ -33,7 +33,32 @@ $user = Users::getUserData();
 				<li><a href="<?=asset('account/wallet-history')?>" class="<?=$c?>"><?=App\Http\Controllers\Web\IndexController::trans_labels('Wallet')?></a></li>
 
 			<!--  endif;?> -->
+@php
+    $c = Route::current()->uri == 'account/become-a-vendor' ? 'active' : '';
+@endphp
 
+@if (Auth::user()->role_id != 1)
+    <li>
+        <a href="{{ asset('account/become-a-vendor') }}" class="{{ $c }}">
+            {{ isset($user['metadata']['approved']) && $user['metadata']['approved'] == 1 
+                ? 'Vendor Details' 
+                : 'Become A Vendor' }}
+        </a>
+    </li>
+@endif
+	<?php if( $user['role_id'] == 4) :
+
+					if( isset( $user['metadata']['approved'] ) && $user['metadata']['approved'] == 1 ) : ?>
+
+						<li>
+
+							<a href="<?=asset('admin/product/list')?>">My Products</a>
+
+						</li>
+
+					<?php endif;
+
+				endif;?>
 			<?php Route::current()->uri == 'account/addresses' ? $c = 'active' : $c = '';?>
 
 			<li><a href="<?=asset('account/addresses')?>" class="<?=$c?>"><?=App\Http\Controllers\Web\IndexController::trans_labels('My Addresses')?></a></li>

@@ -108,7 +108,7 @@
 					echo $col;
 
 					switch ($field['field-type']) {
-
+						
 						case 'text': ?>
 
 						<div class="form-group  mt-3">
@@ -119,7 +119,7 @@
 
 							</label>
 
-							<input type="text" name="<?=$field['key']?>" 
+							<input type="text" name="<?=$field['key']?>" class="form-control <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>" 
 
 							value="<?php 
 
@@ -129,7 +129,7 @@
 
 							}
 
-						?>" id="tagline" class="form-control">
+						?>" id="tagline">
 
 					</div>							
 
@@ -147,7 +147,7 @@
 
 						</label>
 
-						<textarea class="quilleditor" name="<?=$field['key']?>" height="<?=$field['height']?>">
+						<textarea class="quilleditor <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>" name="<?=$field['key']?>" height="<?=$field['height']?>">
 
 							<?php 
 
@@ -191,7 +191,7 @@
 
 						</button>
 
-						<input type="hidden" id="<?=$field['key']?>" 
+						<input type="hidden" id="<?=$field['key']?>"  class="<?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>"
 
 						name="<?=$field['key']?>" value="
 
@@ -266,7 +266,7 @@
 
 						<button class="btn uploader  btn-primary" data-type="single">+</button>
 
-						<input type="hidden" id="<?=$field['key']?>" 
+						<input type="hidden" id="<?=$field['key']?>" class="<?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>"
 
 						name="<?=$field['key']?>" value="
 
@@ -382,7 +382,7 @@
 
 															</button>
 
-															<input type="hidden" id="<?=$subfield['key'].$i?>" 
+															<input type="hidden" id="<?=$subfield['key'].$i?>"  class="<?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>"
 
 															name="<?=$subfield['key'].$i?>" value="
 
@@ -419,7 +419,7 @@
 														}
 
 													?>" id="tagline" placeholder="<?=$subfield['title']?>" 
-													class="form-control">
+													class="form-control <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>">
 
 												</div>	
 
@@ -435,7 +435,7 @@
 
 													</label>
 
-													<textarea class="quilleditor" name="<?=$subfield['key'].$i?>" height="<?=$subfield['height']?>"
+													<textarea class="quilleditor <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>" name="<?=$subfield['key'].$i?>" height="<?=$subfield['height']?>"
 
 														menubar="<?=$subfield['menubar']?>">
 
@@ -511,7 +511,7 @@
 
 														</button>
 
-														<input type="hidden" id="<?=$subfield['key']?>" 
+														<input type="hidden" id="<?=$subfield['key']?>" class="<?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>"
 
 														name="<?=$subfield['key']?>" value="
 
@@ -548,7 +548,7 @@
 													}
 
 												?>" id="tagline" placeholder="<?=$subfield['title']?>" 
-												class="form-control">
+												class="form-control <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>">
 
 											</div>	
 
@@ -565,7 +565,7 @@
 												</label>
 
 
-												<textarea class="quilleditor" name="<?=$subfield['key']?>" height="<?=$subfield['height']?>"
+												<textarea class="quilleditor <?= !empty($field['is_required']) && $field['is_required'] == 1 ? 'required' : '' ?>" name="<?=$subfield['key']?>" height="<?=$subfield['height']?>"
 
 													menubar="<?=$subfield['menubar']?>">
 

@@ -69,13 +69,13 @@ Route::current() == '' ? $hide = 'd-none' : $hide = '';?>
                                 $url == '' && $item['link'] != 'javascript:;' ? $url = asset($item['link']) : $url = $item['link'];  
 
                                 $item['type'] == 2 ? $url =  asset('shop/category/'.$item['link']) : ''; ?>
-
+@if(isset($item['menu_title']))
                                 <li>
 
                                     <a href="<?=$url?>" class="link"><?=$item['menu_title']?></a>
 
                                 </li>
-                                
+                           @endif     
                             <?php endforeach;?>
 
                         </ul>
@@ -98,13 +98,13 @@ Route::current() == '' ? $hide = 'd-none' : $hide = '';?>
                             $url == '' && $item['link'] != 'javascript:;' ? $url = asset($item['link']) : $url = $item['link'];  
 
                             $item['type'] == 2 ? $url =  asset('shop/category/'.$item['link']) : '';   ?>
-
+@if($item['menu_title'])
                             <li>
 
                                 <a href="<?=$url?>" class="link"><?=$item['menu_title']?></a>
 
                             </li>
-                            
+                     @endif       
                         <?php endforeach;?>
 
                         <?php 
@@ -147,13 +147,13 @@ Route::current() == '' ? $hide = 'd-none' : $hide = '';?>
                                 $url == '' && $item['link'] != 'javascript:;' ? $url = asset($item['link']) : $url = $item['link'];  
 
                                 $item['type'] == 2 ? $url =  asset('shop/category/'.$item['link']) : '';  ?>
-
+@if(isset($item['menu_title']))
                                 <li>
 
                                     <a href="<?=$url?>" class="link"><?=$item['menu_title']?></a>
 
                                 </li>
-                                
+                           @endif     
                             <?php endforeach;?>
 
                         </ul>

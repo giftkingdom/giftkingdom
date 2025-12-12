@@ -210,8 +210,8 @@ input[type=number] {-moz-appearance: textfield;}
 .account-section .acc-right .form.careerFilter .btn:hover svg path{stroke: white;}
 .trans-btn{background: transparent;}
 .trans-btn:hover{background: var(--olive-green);}
-.map-overlap {border: solid 2px var(--olive-green); !important;color: var(--olive-green); !important;}
-.gm-style .place-card a:link, .gm-style .default-card a:link, .gm-style .directions-card a:link{color: var(--olive-green); !important;}
+.map-overlap {border: solid 2px var(--olive-green) !important;color: var(--olive-green) !important;}
+.gm-style .place-card a:link, .gm-style .default-card a:link, .gm-style .directions-card a:link{color: var(--olive-green) !important;}
 /*.account-section .change-pass-form{max-width: 33.75rem;}*/
 .profile-main form .formWrap{background: #f9fbed;padding: 2rem;}
 .profile-main .wallet{color: #f9fbed;display: inline-block;padding: 0.75rem;background: #6c7d36}
@@ -266,10 +266,10 @@ a.whishlist-btn.exists path{fill:var(--olive-green);stroke:var(--olive-green)}
 .offers-section-one .col-lg-6:nth-child(5) .sec1 span, .home-section-nine .sec1-box2, .offers-section-one .col-lg-6:nth-child(3) .sec1 span, .home-section-nine .sec1-box2, .offers-section-one .col-lg-6:nth-child(2) .sec1 span{color: #fff;border-color: #fff}
 .offers-section-one .col-lg-6:nth-child(5) .sec1 h3, .home-section-nine .sec1-box2, .offers-section-one .col-lg-6:nth-child(3) .sec1 h3, .home-section-nine .sec1-box2, .offers-section-one .col-lg-6:nth-child(2) .sec1 h3{color: #fff}
 
-.storedetail-section-one .store-wrap {background: #F6F6F6;padding: 1.875rem;border-radius: 20px;}
+.storedetail-section-one .store-wrap {background: rgba(241, 246, 211, 0.4);padding: 1.875rem;}
 .storedetail-section-one .categories h4 {font-size: 1.375rem;}
 .storedetail-section-one .categories a{font-family: var(--primary-font-family);font-size: 1.125rem;border-bottom: 1px solid rgb(51 51 51 / 10%);padding: 0.625rem 0;display: block;}
-.storedetail-section-one h5 {font-family: var(--base-font-family);}
+
 .storedetail-section-one .products a {display: flex;gap: 1rem;align-items: center;padding: 1.25rem 0;border-bottom: 1px solid rgb(51 51 51 / 10%);}
 .storedetail-section-one .products p {margin-bottom: 0.3rem;line-height: 1.3}
 .storedetail-section-one .products a span{font-size: 1rem;color: var(--primary-font-color);font-family: var(--primary-font-family);}
@@ -387,7 +387,7 @@ a.whishlist-btn.exists path{fill:var(--olive-green);stroke:var(--olive-green)}
 .cart-summary .form-control{background: #fff !important;border-radius: 60px;border: 1px solid rgba(65, 64, 66, 0.2); border-color:rgba(65, 64, 66, 0.2) !important;padding:0.59rem 3rem 0.7rem 1.2rem;}
 .cart-summary .form-control::placeholder{color: rgba(51, 51, 51, 0.6);}
 .checkout-section .cart-item p, .checkout-section .payment-methods .form-check *{color: rgb(8 15 34 / 40%);transition: 0.75s;}
-.cart-summary .form-group button{top: 5px;right: 6px;background: var(--olive-green);;width: 2.125rem;height: 2.125rem;box-shadow: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; border:1px solid var(--olive-green); !important; transition: 0.5s;}
+.cart-summary .form-group button{top: 5px;right: 6px;background: var(--olive-green);;width: 2.125rem;height: 2.125rem;box-shadow: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; border:1px solid var(--olive-green) !important; transition: 0.5s;}
 .cart-summary .form-group button:hover{background: transparent;}
 .cart-summary .form-group button path{transition: 0.75s}
 .cart-summary .form-group button:hover path{stroke: var(--olive-green)}
@@ -481,7 +481,7 @@ input[type=range]::-webkit-slider-thumb {background: #2D3C0A !important;}
 .shop-top ul li a{border: 1px solid #E4E4E4;background: #fff;padding: 0.875rem 1.34rem;border-radius: 50px;display: inline-flex;gap: 0.5rem}
 .shop-top ul li a.active{background: var(--olive-green);;border-color:var(--olive-green);;color: #fff}
 
-.badge{top: 0.5rem;left: 0.5rem;background: #FFB904;border-radius: 12px;font-size: 0.625rem;font-family: 'ClashGrotesk-Medium', sans-serif;font-weight: normal;padding: 0.44rem 1.05rem;}
+.badge{z-index:1;top: 0.5rem;left: 0.5rem;background: #FFB904;border-radius: 12px;font-size: 0.625rem;font-family: 'ClashGrotesk-Medium', sans-serif;font-weight: normal;padding: 0.44rem 1.05rem;}
 
 #range { -webkit-appearance: none; width: 100%; }
 #range:focus { outline: none; }
@@ -542,7 +542,7 @@ body .productdetail-section-one .pro-slider .slick-slide, body .productdetail-se
 .productdetail-section-one .product-details > li:last-child{border: 0;margin: 0;padding: 0}
 .productdetail-section-one .product-details strong{display: flex;align-items:center;gap:0.625rem;margin-bottom: 0.75rem;font-weight: 400;}
 .productdetail-section-one .product-details strong span{background: var(--olive-green);height: 2rem;width: 2rem;min-width:2rem;display: flex;border-radius: 50%;justify-content: center;align-items: center;}
-.productdetail-section-one .product-details li h3{font-size: 2rem;margin: 0;font}
+.productdetail-section-one .product-details li h3{font-size: 2rem;margin: 0;}
 .productdetail-section-one .product-details h6 a{font-size: 0.75rem;color: var(--olive-green);}
 .productdetail-section-one .product-details li p{color: rgb(51 51 51 / 80%);}
 .productdetail-section-one .product-details li ul li{background:rgb(255 255 255 / 40%);display: flex;border: 1px solid rgb(39 79 255 / 20%);min-width: 14.813rem;padding: 14px 18px;border-radius: 10px;gap: 20px;align-items: center;margin: 20px 0;}
@@ -674,6 +674,8 @@ body .iti--separate-dial-code.iti--show-flags .iti__selected-dial-code{margin-le
 body .iti__arrow{margin-left: 0.375rem;border-left-width: 0.188rem;border-right-width: 0.188rem;border-top-width: 0.25rem}
 #addressModal .btn-close{top: -2.25rem;right: -1.5rem;}
 
+.store-item figure {width: 3.75rem;height: 3.75rem;display: flex;justify-content: center;align-items: center;border-radius: 50%;}
+
 .debit{color: red}
 .credit{color: green}
 
@@ -742,4 +744,4 @@ html[lang="ar"] .modal .btn-close.end-0{left: 0;right: auto !important}
 @media only screen and (min-width: 1600px) {html {font-size: 120%;-webkit-text-size-adjust: 100%;}}
 @media only screen and (min-width: 1825px) {html {font-size: 130%;-webkit-text-size-adjust: 100%;}.dropdownMenu{height: auto;}.subMenu{width: 66rem}}
 @media only screen and (min-width: 2030px) {html {font-size: 160%;-webkit-text-size-adjust: 100%;}}
-@media only screen and (min-width: 2700px) {html {font-size: 200%;-webkit-text-size-adjust: 100%;}
+@media only screen and (min-width: 2700px) {html {font-size: 200%;-webkit-text-size-adjust: 100%;}}

@@ -7,7 +7,14 @@ use Illuminate\Support\Facades\Artisan;
 $middleware = ['installer'];
 
 Route::get('/maintance', 'Web\IndexController@maintance');
+Route::get('/test-forgot', function(){
+$check = \App\Models\Web\Users::where('email','team.digitalsetgo@gmail.com')->first();
+	return view('mail.forgot', [
+    'title' => 'Forgot',
+    'data' => $check
+]);
 
+});
 Route::group(['namespace' => 'Web', 'middleware' => ['installer']], function () {
 	Route::get('/login', 'CustomersController@login');
 	Route::post('/process-login', 'CustomersController@processLogin');
@@ -63,6 +70,8 @@ Route::group(['namespace' => 'Web', 'middleware' => $middleware], function () {
 	Route::post('help-center', 'IndexController@searchQuestion');
 
 	Route::get('shop/featured', 'ProductsController@shop');
+	Route::get('/store/{storename}', 'IndexController@storeDetail');
+	Route::get('/stores', 'IndexController@stores')->name('web.stores');
 
 	Route::get('shop/', 'ProductsController@shop');
 
@@ -188,6 +197,8 @@ Route::group(['namespace' => 'Web', 'middleware' => $middleware], function () {
 
 
 	Route::get('/account/payment-option', 'CustomersController@paymentOption')->middleware('Customer');
+Route::get('/account/become-a-vendor', 'CustomersController@becomeSeller')->middleware('Customer');
+	Route::post('/vendor/update', 'CustomersController@updateVendor')->middleware('Customer');
 
 	Route::get('/account/wallet', 'CustomersController@wallet')->middleware('Customer');
 	Route::post('/wallet-history/filter', 'CustomersController@filterWalletHistory')->name('wallet.history.filter');

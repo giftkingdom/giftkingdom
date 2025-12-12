@@ -53,8 +53,12 @@ public function view(Request $request) {
     $search = $request->input('s', null);
     $category = $request->input('cat', 'All');
 
+	if(Auth::user()->role_id == 4){
+    $query = Products::where('prod_parent', 0)->where('author_id',Auth()->user()->id)->orderBy('created_at', 'desc');
+	}else{
     $query = Products::where('prod_parent', 0)->orderBy('created_at', 'desc');
 
+	}
     if ($category && $category != 'All') {
         $ids = ProductsToCategories::where('category_ID', $category)->pluck('product_ID');
         $query->whereIn('ID', $ids);
@@ -804,7 +808,7 @@ public function view(Request $request) {
 
 	public function inventory(Request $request){
 
-		if( Auth::user()->role_id == 1 ) :
+		if( in_array(Auth::user()->role_id, [1,2])) :
 
 			$products = Products::where([['prod_type','!=','variation']])->paginate(25);
 
@@ -856,9 +860,14 @@ public function view(Request $request) {
 		$start = $request->input('start', 0);
 		$draw = $request->input('draw');
 		$search = $request->input('search.value');
-
+if(Auth::user()->role_id == 4){
+	$query = Products::where('prod_status', 'active')->where('author_id',Auth()->user()->id)
+                 ->whereIn('prod_type', ['variation', 'simple']);
+}else{
 $query = Products::where('prod_status', 'active')
                  ->whereIn('prod_type', ['variation', 'simple']);
+}
+
 
 		if (!empty($search)) {
 			$query->where(function ($q) use ($search) {
@@ -915,8 +924,8 @@ $query = Products::where('prod_status', 'active')
 				'image' => '<img src="' . asset($fullProduct['prod_image']) . '" height="70" style="object-fit: cover;">',
 				'title' => e($prodTitle),
 				'stock' => $fullProduct['prod_quantity'],
-				'purchase_price' => $fullProduct['purchase_price'],
-				'sell_price' => $fullProduct['price'],
+				'purchase_price' => $fullProduct['prod_price'],
+				'sell_price' => $fullProduct['sale_price'],
 				'author' => $author['email'] ?? 'N/A',
 				'action' => '<a title="Edit" href="' . $actionUrl . '" class="badge bg-light-blue"><i class="fas fa-edit"></i></a>',
 			];

@@ -7,7 +7,6 @@ use App\Models\Core\Taxonomy;
 
 $posttypes = Posttypes::all(); ?>
 
-
 <aside class="main-sidebar">
 
   <section class="sidebar">
@@ -283,7 +282,7 @@ $posttypes = Posttypes::all(); ?>
 
 <?php if( Auth()->user()->role_id == 1 ) : ?>
 
-<li class="treeview d-none <?= Request::is('admin/vendors/display') ? 'active' : '' ?> <?= Request::is('admin/vendors/edit/*') ? 'active' : '' ?>">
+<li class="treeview <?= Request::is('admin/vendors/display') ? 'active' : '' ?> <?= Request::is('admin/vendors/edit/*') ? 'active' : '' ?>">
 
   <a href="<?= URL::to('admin/vendors/display')?>">
 
@@ -292,7 +291,15 @@ $posttypes = Posttypes::all(); ?>
   </a>
 
 </li>
+<li class="treeview d-none <?= Request::is('admin/stores/display') ? 'active' : '' ?>">
 
+  <a href="<?= URL::to('admin/stores/display')?>">
+
+    <i class="fa fa-users"></i> <span>Stores</span>
+
+  </a>
+
+</li>
 <li class="treeview <?= Request::is('admin/customers/display') ? 'active' : '' ?> <?= Request::is('admin/customers/edit/*') ? 'active' : '' ?>">
 
   <a href="<?= URL::to('admin/customers/display')?>">
@@ -304,9 +311,9 @@ $posttypes = Posttypes::all(); ?>
 </li>
 
 
- <li class="treeview <?= Request::is('admin/customers/*') ? 'active' : '' ?>">
+ <li class="treeview <?= Request::is('admin/customer-wallet-history/*') ? 'active' : '' ?>">
 
-  <a href="<?= URL::to('admin/customers/wallet')?>">
+  <a href="<?= URL::to('admin/customer-wallet-history')?>">
 
     <i class="fa-solid fa-wallet"></i> <span>Customer Wallet History</span>
 
@@ -328,12 +335,13 @@ $posttypes = Posttypes::all(); ?>
 
 
 <!-- Currency -->
+@if(in_array(Auth::user()->role_id, [1,2]))
 <li class="treeview <?= Request::is('admin/currencies/display') ? 'active' : '' ?> <?= Request::is('admin/currencies/add') ? 'active' : '' ?> <?= Request::is('admin/currencies/edit/*') ? 'active' : '' ?> <?= Request::is('admin/currencies/filter') ? 'active' : '' ?>">
   <a href="<?= URL::to('admin/currencies/display')?>">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M64 64C28.7 64 0 92.7 0 128V384c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H64zm64 320H64V320c35.3 0 64 28.7 64 64zM64 192V128h64c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64v64H448zm64-192c-35.3 0-64-28.7-64-64h64v64zM288 352c-53 0-96-43-96-96s43-96 96-96s96 43 96 96s-43 96-96 96z"/></svg><span> <?= trans('labels.currency') ?></span> 
   </a>
 </li>
-
+@endif
 <!-- Tax -->
 <li class="treeview d-none <?= Request::is('admin/tax/taxclass/display') ? 'active' : '' ?> <?= Request::is('admin/tax/taxclass/add') ? 'active' : '' ?> <?= Request::is('admin/tax/taxclass/edit/*') ? 'active' : '' ?> <?= Request::is('admin/tax/taxrates/display') ? 'active' : '' ?> <?= Request::is('admin/tax/taxrates/add') ? 'active' : '' ?> <?= Request::is('admin/tax/taxrates/edit/*') ? 'active' : '' ?>">
   <a href="#">
@@ -391,20 +399,30 @@ $posttypes = Posttypes::all(); ?>
 </li>
 
 <?php endif;?>
-
 <li class="treeview {{ Request::is('admin/contact-form') ? 'active' : '' }} {{ Request::is('admin/design-form') ? 'active' : '' }}">
   <a href="#"><i class="fas fa-paper-plane" aria-hidden="true"></i> <span> Form Requests </span> <i class="fa fa-angle-right pull-right"></i></a>
   <ul class="treeview-menu">
     <li class="treeview {{ Request::is('admin/contact-form') ? 'active' : '' }}">
       <a href="{{ url('admin/contact-form') }}">
-        <i class="fas fa-circle"></i> <span>Contact Form</span>
+        <i class="fas fa-circle"></i> 
+        <span>
+          @if(Auth::user()->role_id == 4)
+            Your Inquiries
+          @else
+            Contact Form
+          @endif
+        </span>
       </a>
     </li>
+    @if(in_array(Auth::user()->role_id, [1,2]))
+
     <li class="treeview {{ Request::is('admin/event-inquiries') ? 'active' : '' }}">
       <a href="{{ url('admin/event-inquiries') }}">
         <i class="fas fa-circle"></i> <span>Event Inquiries</span>
       </a>
     </li>
+@endif
+
   </ul>
 </li>
 

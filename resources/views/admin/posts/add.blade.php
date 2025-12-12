@@ -68,7 +68,7 @@
 
                             <label for="name" class="control-label mb-1">Title</label>
 
-                            <input type="text" name="pagetitle" class="pagetitle form-control" required>
+                            <input type="text" name="pagetitle" class="pagetitle form-control required @if(!empty($data['post_type']) && $data['post_type']['type'] === 'blogs' || $data['post_type']['type'] === 'faqs')required @endif">
 
                         </div>
 
@@ -99,7 +99,7 @@
 
                             <label for="name" class="control-label mb-1">Slug</label>
 
-                            <input type="text" name="slug" class="form-control" required>
+                            <input type="text" name="slug" class="form-control required">
 
                         </div>
 
@@ -116,7 +116,7 @@
                         @php $termslug = '' @endphp
 
                         @foreach($data['taxonomy'] as $key => $terms)
-
+                        
                         @php $termslug.=$key.',' @endphp
 
                         <div class="form-group mt-3">
@@ -126,8 +126,7 @@
                                 {{ucfirst($key)}}
 
                             </label>
-
-                            <select class="form-control select2" multiple placeholder="Choose {{ucfirst($key)}}" name="{{$key}}[]" id="{{$key}}">
+                            <select class="form-control select2 @if(!empty($data['post_type']) && $data['post_type']['type'] === 'blogs')required @endif" multiple placeholder="Choose {{ucfirst($key)}}" name="{{$key}}[]" id="{{$key}}" >
 
                                 @foreach($terms as $term)
 
@@ -148,6 +147,7 @@
 
 
                         <input type="hidden" name="terms" value="{{$termslug}}">
+@if($data['post_type']['type'] != 'faqs' && $data['post_type']['type'] != 'reasons')
 
                         <div class="form-group mt-3">
 
@@ -157,14 +157,14 @@
 
                                 <button class="btn uploader featured_image btn-primary" data-type="single">+</button>
 
-                                <input type="hidden" id="featured_image" name="featured_image" value="">
+                                <input type="hidden" id="featured_image" name="featured_image" class="required" value="">
 
                                 <img src="" alt="featured_image" class="w-100 d-none">
 
                             </div>
 
                         </div>
-
+@endif
                         <div class="form-group mt-3">
 
                             <div class="form-group">
@@ -244,7 +244,11 @@
 
                                 <label for="name" class="control-label mb-1">Content</label>
 
-                                <textarea class="quilleditor" name="post_content" height="650"></textarea>
+<textarea 
+    class="quilleditor @if(!empty($data['post_type']) && $data['post_type']['type'] === 'blogs' || $data['post_type']['type'] === 'faqs')required @endif" 
+    name="post_content"
+    style="height: 650px;"
+></textarea>
 
                             </div>
 

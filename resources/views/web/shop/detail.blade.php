@@ -262,7 +262,36 @@ $sale_price = $result['sale_price'] * session('currency_value'); ?>
 							<ul class="category">
 								<li class="d-flex align-items-center gap-3"><strong><?=App\Http\Controllers\Web\IndexController::trans_labels('Category')?>:</strong><span> <?=rtrim($result['categories'],', ')?></span></li>
 							</ul>
+<div class="store">
 
+	<div class="store-item d-flex align-items-center gap-3 mt-4">
+		@if(isset($result['store_meta']['store_name']))
+
+									<strong><?=App\Http\Controllers\Web\IndexController::trans_labels('By')?>:</strong>
+									@endif
+@if(isset($result['store_meta']['store_logo_image']))
+									<figure>
+
+										<img src="{{ asset($result['store_meta']['store_logo_image']) }}" alt="*">
+
+									</figure>
+@endif
+@if(isset($result['store_meta']['store_name']))
+									<figcaption>
+
+										<h5 class="mt-0">
+											<a href="<?=asset('store/'.$result['store_meta']['store_name'])?>">
+												{{ $result['store_meta']['vendor_name'] }}											
+											</a>
+										</h5>
+
+										<span>({{ \App\Models\Web\Products::where('author_id', $result['author_id'])->where('prod_status','active')->whereIn('prod_type', ['simple','variable'])->count() }} <?=App\Http\Controllers\Web\IndexController::trans_labels('Products')?>)</span>
+
+									</figcaption>
+@endif
+								</div>
+
+							</div>
 							<div class="quantity w-auto flex-row position-relative d-flex justify-content-start align-items-center shop cart-item-qty my-4">
 
 								<span><?=App\Http\Controllers\Web\IndexController::trans_labels('Quantity')?></span>

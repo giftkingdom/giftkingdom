@@ -424,10 +424,11 @@ $content = $content->toArray();
             $settings = Setting::commonContent();
 
             DB::table('inquiry')->insert([
-                'name' => $data['name'],
-                'email' => $data['email'],
+                'name' => $data['name'] ?? '',
+                'email' => $data['email'] ?? '',
                 'subject' => $data['subject'] ?? '',
                 'message' => $data['message'] ?? '',
+                'vendor_id' => $data['vendor_id'] ?? null,
                 'support_category' => $data['support_category'] ?? '',
                 'created_at' => now(),
             ]);
@@ -844,5 +845,87 @@ public function getSavedCartitemAddresses(Request $request)
         'data' => null
     ]);
 }
+    public function storeDetail(Request $request){
+
+        $id = Usermeta::where([['meta_key','store_name'],['meta_value',$request->storename]])->pluck('user_id')->first();
+        $data['user'] = Users::getUserData($id);
+        $data['store'] = Users::getUserData($id);
+
+        $data['rand-products'] = Products::getStoreProducts($id);
+
+        return view("web.store-details", ['title' => 'Home'])->with('data',$data);
+    }
+
+public function stores(Request $request)
+{
+    $pageData = Pages::where('slug', 'stores')->first();
+$lang = session()->get('lang_id', 1);
+
+$content = Content::where([
+    ['page_id', $pageData->page_id],
+    ['lang', $lang]
+])->get();
+
+if ($content->isEmpty() && $lang != 1) {
+    $content = Content::where([
+        ['page_id', $pageData->page_id],
+        ['lang', 1]
+    ])->get();
+}
+
+$data['content'] = self::parseContent($content->toArray());
+    $query = Users::where('role_id', 4);
+
+    $approvedVendors = Usermeta::where('meta_key', 'approved')
+        ->where('meta_value', '1')
+        ->pluck('user_id')
+        ->toArray();
+
+    $query->whereIn('id', $approvedVendors);
+
+    if ($request->filled('search')) {
+        $searchedIds = Usermeta::where('meta_key', 'store_name')
+            ->where('meta_value', 'like', '%' . $request->search . '%')
+            ->pluck('user_id')
+            ->toArray();
+
+        $query->whereIn('id', $searchedIds);
+    }
+
+    $vendors = $query->paginate(12);
+
+    $data['stores'] = [];
+    foreach ($vendors as $vendor) {
+        $userData = Users::getUserData($vendor->id);
+
+        if (
+            empty($userData['metadata']['store_name']) ||
+            ($userData['metadata']['approved'] ?? 0) != 1
+        ) {
+            continue;
+        }
+
+        $data['stores'][] = $userData;
+    }
+
+    $result = [
+        'total' => $vendors->total(),
+        'per_page' => $vendors->perPage(),
+        'links' => $vendors->linkCollection()->toArray(),
+    ];
+
+    if ($request->ajax()) {
+        $html = view('web.partials.store_results', compact('data', 'result'))->render();
+        return response()->json(['html' => $html]);
+    }
+
+    return view('web.stores', [
+        'title' => 'Stores',
+        'data' => $data,
+        'result' => $result
+    ]);
+}
+
+
 
 }

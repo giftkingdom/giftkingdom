@@ -121,7 +121,7 @@ class MediaController extends Controller
         $filedata =  $_FILES;
 
 
-        if ( in_array($image->getClientOriginalExtension() , ['pdf' , 'docx' , 'png' , 'jpg' , 'jpeg','webp', 'webm' , 'mp4']) ) {
+        if ( in_array($image->getClientOriginalExtension() , ['pdf' , 'docx' , 'png' , 'jpg' , 'jpeg','webp', 'webm' , 'mp4','svg']) ) {
             // getting size
             $extension = $image->getClientOriginalExtension();
 

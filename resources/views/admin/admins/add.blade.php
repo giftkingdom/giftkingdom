@@ -92,7 +92,7 @@
 
                             <label for="name" class="control-label mb-1">Phone</label>
 
-                            <input type="number" name="phone" class="form-control" required="">
+                            <input type="number" name="phone" class="form-control">
 
                         </div>
 

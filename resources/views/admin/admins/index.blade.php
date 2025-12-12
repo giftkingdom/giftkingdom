@@ -41,14 +41,24 @@
                             <div class="col-md-10">
                                 <h3 class="box-title">Listing</h3>
                             </div>
-                            <div class="col-md-2 text-end">
-                                <a href="<?=asset('admin/editaccess')?>" type="button" class="btn btn-block btn-primary">Edit Access</a>
-                            </div>
+                            
 
                         </div>
 
                     </div>
+@if(session()->has('success'))
 
+            <div class="box-info">
+
+                <div class="alert alert-success">
+
+                    <?= session()->get('success') ?>
+
+                </div>
+
+            </div>
+
+            @endif
                     <div class="box-body">
 
                         <div class="row">
@@ -93,7 +103,7 @@
 
                                     <input type="hidden" name="selected_rows" value="" id="selected_rows">
 
-                                    <a href="javascript:delete_popup('<?=asset('admin/deletepost')?>','');" class="badge delete-multiple-popup bg-red">
+                                    <a href="javascript:delete_popup('<?=asset('admin/admin/delete')?>','');" class="badge delete-multiple-popup bg-red">
 
                                         <i class="fa fa-trash" aria-hidden="true"></i>
 

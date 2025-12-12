@@ -19,9 +19,9 @@ $blogs = $data['blogs'] ; ?>
 			<div class="row justify-content-between align-items-center">
 
 				<div class="col-sm-8 col-md-6 col-xl-5">
-
+@if(isset($page['banner_text']) || isset($page['pagetitle']))
 					<h1 class="mb-0 wow fadeInUp"><?=isset($page['banner_text']) ? $page['banner_text'] : $page['pagetitle'] ?></h1>
-
+@endif
 					<div class="breadcrumb mt-2 mt-lg-4 mb-3 wow fadeInUp">
 
 						<ul class="d-inline-flex align-items-center bg-transparent rounded-0 border-0 gap-2">
@@ -29,9 +29,9 @@ $blogs = $data['blogs'] ; ?>
 							<li><a href="<?=asset('')?>"><?=App\Http\Controllers\Web\IndexController::trans_labels('Home')?></a></li>
 
 							<li>></li>
-
+@if(isset($page['pagetitle']))
 							<li><a href="javascript:;"><?=$page['pagetitle'] ?></a></li>
-
+@endif
 						</ul>
 
 					</div>
@@ -39,13 +39,13 @@ $blogs = $data['blogs'] ; ?>
 				</div>
 
 				<div class="col-sm-4 col-md-3">
-
+@if(isset($page['banner_image']['path']))
 					<figure class="overflow-hidden">
 
 						<img src="<?=asset($page['banner_image']['path'])?>" alt="*" class="w-100 wow">
 
 					</figure>
-
+@endif
 				</div>
 
 			</div>
@@ -75,19 +75,21 @@ $blogs = $data['blogs'] ; ?>
             <div class="col-sm-6 col-md-6 col-xl-4">
                 <a href="<?= asset('blog/' . $blog['post_name']) ?>">
                     <article>
+                        @if(isset($img))
                         <figure class="overflow-hidden">
                             <img src="<?= asset($img) ?>" alt="*" class="w-100 rounded-0 wow">
                         </figure>
-
+@endif
                         <article class="mt-3">
                             <span class="d-flex gap-3">
                                 <?= $blog['cat'] ?> | <?= date('M,d,y', strtotime($blog['created_at'])) ?>
                             </span>
-
+@if(isset($blog['metadata']['pagetitle']) || isset($blog['post_title']))
                             <h5 class="my-3">
                                 <?= $blog['metadata']['pagetitle'] ?? $blog['post_title'] ?>
                             </h5>
-
+@endif
+@if(isset($blog['metadata']['post_excerpt']) || isset($blog['post_excerpt']))
                             <?php
                             $para = explode(' ', $blog['metadata']['post_excerpt'] ?? $blog['post_excerpt']);
                             $excerpt = '';
@@ -96,6 +98,7 @@ $blogs = $data['blogs'] ; ?>
                             endforeach;
                             echo (str_word_count($excerpt) < 27) ? $excerpt : rtrim($excerpt, ' ') . '...';
                             ?>
+                            @endif
                         </article>
                     </article>
                 </a>

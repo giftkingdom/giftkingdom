@@ -194,7 +194,7 @@ class Posts extends Model
 			'post_content' => $check['post_content'],
 			'post_title' => $check['pagetitle'],
 			'post_name' =>  $check['slug'],
-			'featured_image' =>  $check['featured_image'],
+			'featured_image' =>  $check['featured_image'] ?? null,
 			'post_status' =>  $check['post_status'],
 			'post_type' =>  $check['post_type'],
 			'post_excerpt' =>  $check['post_excerpt'],
@@ -222,7 +222,7 @@ class Posts extends Model
 
 			$arr['post_title'] = $check['pagetitle'];
 
-			$arr['featured_image'] =  $check['featured_image'];
+			$arr['featured_image'] =  $check['featured_image'] ?? null;
 
 			$arr['post_excerpt'] =  $check['post_excerpt'];
 			$arr['reason_type'] =  $check['reason_type'] ?? null;

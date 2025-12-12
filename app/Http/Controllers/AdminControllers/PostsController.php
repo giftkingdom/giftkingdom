@@ -14,6 +14,7 @@ use App\Models\Core\Products;
 use App\Models\Core\Taxonomy;
 use App\Models\Core\Terms;
 use App\Models\Core\TermRelations;
+use DB;
 
 class PostsController extends Controller{
 
@@ -310,12 +311,19 @@ public function getPostTypes(Request $request)
     $data = [];
     $serial = $start + 1;
     foreach ($posts as $post) {
+
         // Determine image URL
         $image = null;
-        if (!empty($post->featured_image['path'])) {
-            $image = asset($post->featured_image['path']);
-        }
+		$imageID = (int)$post->featured_image;
 
+        $featured_image = DB::table('image_categories')
+            ->where('image_type', 'ACTUAL')
+            ->where('image_id', $post->featured_image)
+            ->value('path');
+
+        if (!empty($featured_image)) {
+            $image = asset($featured_image);
+        }
         $action = '
             <div class="careerFilter">
                 <div class="child_option position-relative">
@@ -326,7 +334,7 @@ public function getPostTypes(Request $request)
                     </button>
                     <div class="dropdown-menu2 dropdown-menu-right" style="display: none;">
                         <ul class="careerFilterInr">
-                            <li><a href="' . asset('admin/edit/' . $post->ID) . '">Edit</a></li>
+                            <li><a href="' . asset('admin/edit/'. $post->post_type . '/' . $post->ID) . '">Edit</a></li>
                             <li><a href="javascript:delete_popup(\'' . asset('admin/deletepost') . '\',' . $post->ID . ');">Delete</a></li>
                         </ul>
                     </div>

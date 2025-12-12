@@ -70,17 +70,21 @@ $events = $data['events'] ; ?>
                     <div class="col-sm-6 col-md-4 col-lg-3">
                         <div class="product-card">
                             <figure class="d-flex justify-content-center align-items-center overflow-hidden bg-transparent h-auto">
+                                @if($event['featured_image']['path'])
                                 <a href="<?=asset('event/'.$event['post_name'])?>">
                                     <img src="<?=asset($event['featured_image']['path'])?>" alt="*" class="wow">
                                 </a>
+                                @endif
                                 <div class="position-absolute bottom-0 left-0 right-0 w-100 shop-now px-3 py-2">
                                     <a href="<?=asset('event/'.$event['post_name'])?>" class="d-flex align-items-center text-white gap-3 justify-content-between"><?=App\Http\Controllers\Web\IndexController::trans_labels('Learn More')?> <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1V13M13 7H1" stroke="#F1F6D3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </a>
                                 </div>
                             </figure>
+@if(isset($event['metadata']['pagetitle']) || isset($event['post_title']))
                             <article class="text-center pt-3 wow fadeInUp">
                                 <h5 class="mb-0"><?=$event['metadata']['pagetitle'] ?? $event['post_title']?></h5>
                             </article>
+                            @endif
                         </div>
                     </div>
 

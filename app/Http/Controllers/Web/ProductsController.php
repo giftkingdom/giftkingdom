@@ -58,12 +58,23 @@ class ProductsController extends Controller
                 if( $lang != 1 ) :
 
                     $checkmeta = Postmeta::where([['posts_id',$item['ID']],['lang',$lang],['meta_key','prod_title']])->pluck('meta_value')->first();
-                    
+
                     $item['prod_title'] = $checkmeta ?? $item['prod_title'];
 
                 endif;
+if( $lang != 1 ){
+                                        $image = Postmeta::where([['posts_id',$item['ID']],['lang',$lang],['meta_key','prod_image']])->pluck('meta_value')->first();
+    if($image){
 
-                $item['prod_image'] = Index::get_image_path($item['prod_image']);
+        $item['prod_image'] = Index::get_image_path($image);
+    }else{
+            $item['prod_image'] = Index::get_image_path($item['prod_image']);
+
+    }
+
+}else{
+    $item['prod_image'] = Index::get_image_path($item['prod_image']);
+}
 
                 if( $item['prod_type'] == 'variable' ) :
 
@@ -97,8 +108,7 @@ class ProductsController extends Controller
         $filter['recipients'] = Categories::getRecursive($category,18);
         
         $filter['occassions'] = Categories::getRecursive($category,13);
-        $category != 0 ? $meta = Termmeta::getTermmeta($category,true)  : '';
-        
+        $category != 0 ? $meta = Termmeta::getTermmeta($category,true)  : '';        
         $category == 0 ? $category = null : $category = Categories::getParentID($category);
 
         $category != 0 ? $filter['attributes'] = CategoriesToAttributes::getData($category)  : '';
@@ -168,7 +178,8 @@ $result['content'] = \App\Http\Controllers\Web\IndexController::parseContent($co
         $related = Products::getRelated($request->slug);
         
         $meta = isset( $result['meta'] ) ? $result['meta']  : [];
-        
+        $meta['title'] = $result['prod_title'];
+
         return view("web.shop.detail", ['prodtitle' => $result['prod_title']])->with('result', $result)->with('related',$related)->with('meta',$meta);
     }
 

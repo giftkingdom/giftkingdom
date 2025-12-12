@@ -351,19 +351,19 @@ Route::group(['middleware' => ['installer']], function () {
     
     Route::group(['prefix' => 'admin/page', 'middleware' => 'auth', 'namespace' => 'AdminControllers'], function () {
 
-        Route::get('list', 'PagesController@webpages');
+        Route::get('list', 'PagesController@webpages')->middleware('CheckIfAllowed');
 
-        Route::get('add', 'PagesController@addwebpage');
+        Route::get('add', 'PagesController@addwebpage')->middleware('CheckIfAllowed');
 
-        Route::post('create', 'PagesController@addnewwebpage');
+        Route::post('create', 'PagesController@addnewwebpage')->middleware('CheckIfAllowed');
 
-        Route::get('edit/{id}', 'PagesController@editwebpage');
+        Route::get('edit/{id}', 'PagesController@editwebpage')->middleware('CheckIfAllowed');
 
-        Route::post('update', 'PagesController@updatewebpage');
+        Route::post('update', 'PagesController@updatewebpage')->middleware('CheckIfAllowed');
 
-        Route::post('change_lang', 'PagesController@changeLang');
+        Route::post('change_lang', 'PagesController@changeLang')->middleware('CheckIfAllowed');
 
-Route::post('delete/{id?}', 'PagesController@deletepage');
+       Route::post('delete/{id?}', 'PagesController@deletepage');
        Route::get('ajax', 'PagesController@getPagesAjax')->name('admin.pages.ajax');
 
     });
@@ -397,6 +397,8 @@ Route::post('delete/{id?}', 'PagesController@deletepage');
 
         Route::get('/list/{post_type}/', 'PostsController@view')->middleware('CheckIfAllowed');
 Route::get('posts-ajax', 'PostsController@getPostTypes');
+        Route::get('/customer-wallet-history', 'CustomersController@wallet')->middleware('CheckIfAllowed');
+        Route::get('/customer-wallet-ajax', 'CustomersController@walletAjax')->middleware('CheckIfAllowed');
 
         Route::get('/add/{post_type}/', 'PostsController@add')->middleware('CheckIfAllowed');
 
@@ -404,7 +406,7 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
 
         Route::post('posts/change_lang', 'PostsController@changeLang');
 
-        Route::get('/edit/{post_id}/', 'PostsController@edit')->middleware('CheckIfAllowed');
+        Route::get('/edit/{post_type}/{post_id}/', 'PostsController@edit')->middleware('CheckIfAllowed');
 
         Route::post('/update/{post_id}/', 'PostsController@update')->middleware('CheckIfAllowed');
 
@@ -429,11 +431,11 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
 
         //Reports Routes
 
-        Route::get('/reports/low-stock/', 'ReportsController@lowStock')->middleware('CheckIfAllowedVendor');
+        Route::get('/reports/low-stock/', 'ReportsController@lowStock')->middleware('CheckIfAllowed');
         Route::get('/reports/low-stock-ajax/', 'ReportsController@getLowStockProducts')->middleware('CheckIfAllowedVendor');
         Route::get('/reviews-ajax/', 'ReviewsController@getReviewsAjax')->middleware('CheckIfAllowedVendor');
 
-        Route::get('/reports/out-stock/', 'ReportsController@outStock')->middleware('CheckIfAllowedVendor');
+        Route::get('/reports/out-stock/', 'ReportsController@outStock')->middleware('CheckIfAllowed');
         Route::get('/reports/out-stock-ajax/', 'ReportsController@getOutStockProducts')->middleware('CheckIfAllowedVendor');
 
         Route::get('/reports/customers/', 'ReportsController@customersTotal')->middleware('CheckIfAllowed');
@@ -444,10 +446,10 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
 
         // Lables
 
-        Route::get('/listingAppLabels', 'AppLabelsController@listingAppLabels');
-        Route::get('/addappkey', 'AppLabelsController@addappkey');
-        Route::post('/addNewAppLabel', 'AppLabelsController@addNewAppLabel');
-        Route::get('/editAppLabel/{id}', 'AppLabelsController@editAppLabel');
+        Route::get('/listingAppLabels', 'AppLabelsController@listingAppLabels')->middleware('CheckIfAllowed');
+        Route::get('/addappkey', 'AppLabelsController@addappkey')->middleware('CheckIfAllowed');
+        Route::post('/addNewAppLabel', 'AppLabelsController@addNewAppLabel')->middleware('CheckIfAllowed');
+        Route::get('/editAppLabel/{id}', 'AppLabelsController@editAppLabel')->middleware('CheckIfAllowed');
         Route::post('/updateAppLabel/', 'AppLabelsController@updateAppLabel');
         Route::get('/applabel', 'AppLabelsController@manageAppLabel');
 
@@ -530,9 +532,8 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
 
         Route::get('/display', 'CustomersController@display')->middleware('CheckIfAllowed');
         Route::get('/customers-ajax', 'CustomersController@getCustomersAjax')->middleware('CheckIfAllowed');
-        Route::get('/wallet-ajax', 'CustomersController@walletAjax')->middleware('CheckIfAllowed');
 
-        Route::get('/wallet', 'CustomersController@wallet')->middleware('CheckIfAllowed');
+
         
         Route::get('/referrals', 'CustomersController@referrals')->middleware('CheckIfAllowed');
 
@@ -550,11 +551,11 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
         Route::post('/update-active-status/{id}', 'CustomersController@updateCustomerStatus')->name('update-customer-status')->middleware('CheckIfAllowed');
 
     });
-
     //Vendors
+
     Route::group(['prefix' => 'admin/vendors', 'middleware' => 'auth', 'namespace' => 'AdminControllers'], function () {
 
-        Route::get('/display', 'VendorsController@display');
+        Route::get('/display', 'VendorsController@display')->middleware('CheckIfAllowed');
 
         Route::get('/add', 'VendorsController@add')->middleware('CheckIfAllowed');
 
@@ -567,6 +568,7 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
         Route::post('/delete', 'VendorsController@delete')->middleware('CheckIfAllowed');
 
         Route::get('/filter', 'VendorsController@filter')->middleware('view_customer');
+        Route::get('/ajax', 'VendorsController@getVendorsAjax')->middleware('CheckIfAllowed');
 
     });
 
@@ -575,7 +577,6 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
         Route::get('status/update/{id}', 'VendorsController@updateStatus');
     });
     
-
     Route::group(['prefix' => 'admin/countries', 'middleware' => 'auth', 'namespace' => 'AdminControllers'], function () {
         Route::get('/filter', 'CountriesController@filter');
         Route::get('/display', 'CountriesController@index');
@@ -745,9 +746,9 @@ Route::get('posts-ajax', 'PostsController@getPostTypes');
         Route::get('/admins', 'AdminController@admins')->middleware('CheckIfAllowed');
                 Route::get('/admins-ajax', 'AdminController@getAdmins')->middleware('CheckIfAllowed');
 
-        Route::get('/editaccess', 'AdminController@editAccess')->middleware('CheckIfAllowed');
+        Route::get('/editaccess/{id}', 'AdminController@editAccess')->middleware('CheckIfAllowed');
 
-        Route::post('/updateaccess', 'AdminController@updateAccess')->middleware('CheckIfAllowed');
+        Route::post('/updateaccess/{id}', 'AdminController@updateAccess')->middleware('CheckIfAllowed');
 
         Route::get('/addadmins', 'AdminController@addadmins')->middleware('CheckIfAllowed');
         

@@ -14,39 +14,35 @@
     $lang = session()->has('lang_id') ? session('lang_id') : 1;
 
     $result = Setting::getWebSettings($lang); ?>
-    
     <meta name="robots" content="index, follow">
-    
-    <title>
         <?php 
 
-        if( isset( $data['post_data']['metadata']['meta_title'] ) ) :
+    $main_title = '';
 
-            echo $data['post_data']['metadata']['meta_title'];
+    if( isset( $data['post_title'] ) ) :
 
-        elseif( isset( $data['content']['home_meta_title'] ) ) :
+        $main_title = $data['post_title'] ;
 
-            echo $data['content']['home_meta_title'];
+    elseif( isset( $data['content']['pagetitle'] ) ) :
 
-        elseif( isset( $data['content']['meta_title'] ) ) :
+        $main_title = $data['content']['pagetitle'] ;
 
-            echo $data['content']['meta_title'];
+    elseif( isset( $data['post_data']['post_title'] ) ) :
 
-        elseif( isset( $meta['metatitle'] ) ) : 
+        $main_title = $data['post_data']['post_title'];
+            elseif( isset( $data['content']['home_title'] ) ) :
 
-            echo $meta['metatitle'];
+        $main_title = $data['content']['home_title'];
+                    elseif( isset( $catdata['category_title'] ) ) :
 
-        elseif( isset( $meta['meta_title'] ) ) : 
+        $main_title = $catdata['category_title'];
+                elseif( isset( $meta['title'] ) ) : 
 
-            echo $meta['meta_title'];
-
-        else:
-
-            echo 'Gift Kingdom';
-
-        endif; ?>
-
-    </title>
+            $main_title = $meta['title'];
+else:
+$main_title = 'Gift Kingdom';
+    endif; ?>
+    <title> <?=$main_title?>    </title>
     <?php 
 
     $keywords = '';
@@ -72,8 +68,36 @@
         $keywords = $meta['metakeywords'];
 
     endif; ?>
+        <?php 
 
+        if( isset( $data['post_data']['metadata']['meta_title'] ) ) :
+
+            $title = $data['post_data']['metadata']['meta_title'];
+
+        elseif( isset( $data['content']['home_meta_title'] ) ) :
+
+            $title = $data['content']['home_meta_title'];
+
+        elseif( isset( $data['content']['meta_title'] ) ) :
+
+            $title = $data['content']['meta_title'];
+
+        elseif( isset( $meta['metatitle'] ) ) : 
+
+            $title = $meta['metatitle'];
+
+        elseif( isset( $meta['meta_title'] ) ) : 
+
+            $title = $meta['meta_title'];
+
+        else:
+
+            $title = 'Gift Kingdom';
+
+        endif; ?>
     <meta name="keywords" content="<?=$keywords?>" />
+        <meta name="title" content="<?=$title?>" />
+
     <?php
 
     $desc = '';

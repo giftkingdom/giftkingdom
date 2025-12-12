@@ -88,9 +88,62 @@ class CouponsController extends Controller
     public function insert(Request $request)
     {
 
-        Coupon::createCoupon($request);
+                $check = \App\Models\Core\Coupon::where('coupon_code', $request->coupon_code)->first();
 
+        if ($check) :
+
+            return redirect()->back()->with('success', 'Coupon Code Already Exists!');
+
+        else :
+
+            \App\Models\Core\Coupon::create([
+
+                'coupon_code'                =>   $request->coupon_code,
+                'status'                =>   $request->status,
+
+                'coupon_description'         =>   $request->coupon_description,
+
+                'discount_type'              =>   $request->discount_type,
+
+                'discount_amount'            =>   $request->discount_amount,
+
+                'individual_use'             =>   0,
+
+                'usage_limit'                =>   $request->usage_limit,
+
+                'usage_limit_per_user'       =>   100,
+
+                'usage_count'                =>   0,
+
+                'limit_usage_to_x_items'     =>   0,
+
+                'product_categories'         =>   0,
+
+                'excluded_product_categories' =>   0,
+
+                'exclude_sale_items'         =>   0,
+
+                'email_restrictions'         =>   0,
+
+                'minimum_amount'             =>   $request->minimum_amount,
+
+                'maximum_amount'             =>   0,
+
+                'expiry_date'                =>   $request->expiry_date,
+
+                'free_shipping'              =>   0,
+
+                'is_redeem'                  =>   0,
+
+                'overall_usage'              =>   0,
+
+                'product_ids' => json_encode($request->input('product_ids', [])),
+
+            ]);
         return redirect('admin/coupons/display')->with('success','Coupon added successfully!');  
+
+        endif;
+
     }
 
     public function edit(Request $request, $id){

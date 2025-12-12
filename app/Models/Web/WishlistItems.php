@@ -31,8 +31,12 @@ class WishlistItems extends Model{
 	                 ->where('wishlist_ID', $wish);
 
 	    $existingRow = $query->first();
+if($var_id != null && $var_id !='0'){
+	$productTitle = Products::where('ID', $var_id)->value('prod_title');
+}else{
 
-	    $productTitle = Products::where('ID', $prod)->value('prod_title');
+	$productTitle = Products::where('ID', $prod)->value('prod_title');
+}
 	    if ($existingRow) {
 	        $query->delete();
 	        $message = "{$productTitle} removed from wishlist!";

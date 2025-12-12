@@ -159,7 +159,7 @@ class Order extends Model
 
                 $meta = $item['item_meta'] != null ? serialize($item['item_meta']) : null;
                 $trade = $item['trade_in'] != null ? serialize($item['trade_in']) : null;
-
+                $product = Products::where('ID', $item['product_ID'])->first();
                 $order_item_id = DB::table('order_items')->insertGetId([
                     'order_ID' => $order->id,
                     'product_ID' => $item['product_ID'],
@@ -167,7 +167,7 @@ class Order extends Model
                     'product_quantity' => $item['product_quantity'],
                     'item_price' => $item['product']['prod_price'],
                     'item_sale_price' => $item['product']['sale_price'],
-                    'author_id' => 1,
+                    'author_id' => $product->author_id,
                     'item_meta' => $meta,
                     'trade_in' => $trade,
 

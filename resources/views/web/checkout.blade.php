@@ -654,7 +654,7 @@ $productsdiscount += $defprice ? ($prodPrice - $salePrice) * $item['product_quan
 @push('scripts')
 
 <script src="<?= asset('assets/js/map.js') ?>"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR-MAP-API-KEY&callback=initAutocomplete&libraries=places&v=weekly">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjacv_lH_wEwBBWJmewcMXhwTmK4tg2y8&callback=initAutocomplete&libraries=places&v=weekly">
 </script>
 <script type="text/javascript">
     setTimeout(function() {

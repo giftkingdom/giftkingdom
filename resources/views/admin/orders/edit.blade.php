@@ -1,7 +1,9 @@
 @extends('admin.layout')
 
 @section('content')
-
+@php
+    $settings = \App\Models\Core\Setting::getWebSettings();
+@endphp
 <div class="modal delete-modal fade show" id="refund" tabindex="-1" aria-labelledby="exampleModalCenterTitle" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
@@ -372,242 +374,224 @@
                             </div>
                             <?php
 
-                            $total = $productsdiscount = $itemtotal = 0;
+$total = $productsdiscount = $itemtotal = 0;
+$subtotal = $order['order_subtotal'];
+$total = $order['order_total'];
+$symbol = $order['currency'];
+
+foreach ($order['items'] as $item) :
+    $authorId = \App\Models\Web\Products::where('ID', $item['product_ID'])->value('author_id');
+    if(isset($authorId) && $authorId != null){
+        $storeName = \App\Models\Web\UserMeta::where('user_id', $authorId)->where('meta_key', 'store_name')->value('meta_value');
+    }
+    $cond = $item['item_sale_price'] != 0 && $item['item_sale_price'] != null;
+    $price = $cond ? $item['item_sale_price'] * $order['currency_value'] * $item['product_quantity'] : $item['item_price'] * $order['currency_value'] * $item['product_quantity'];
+
+    if ($cond) :
+        $defprice = $item['item_price'] * $order['currency_value'] * $item['product_quantity'];
+    else :
+        $defprice = false;
+    endif;
+
+    $itemtotal += $defprice ? $defprice : $price;
+    $productsdiscount += $defprice ? $defprice - $price  : 0; ?>
+
+    <div class="row mb-3 p-3 border">
+
+        <div class="col-md-6 mt-2">
+
+            <div class="cart-item-meta">
+
+                <h5 class="text-capitalize"><?= $item['product_ID']['prod_title'] ?></h5>
+                @if(Auth::user()->role_id == 1 && isset($storeName))
+                <h5 class="text-capitalize">By (<?= $storeName ?>)</h5>
+@endif
+                <?php
+                if (!empty($item['item_meta'])) : $meta = '';
+                    foreach ($item['item_meta'] as $key => $attr) :
+                        if ($attr['attribute'] != null) :
+                            $meta .= $attr['attribute']['attribute_title'] . ': ' . $attr['value']['value_title'] . ', ';
+                        else :
+                            if ($attr['value'] != ''):
+                                $meta .= '<br>Personalized Message: ' . $attr['value'];
+                            endif;
+                        endif;
+                    endforeach; ?>
+                    <p class="mb-2"><?= rtrim($meta, ', ') ?></p>
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-2 mt-2">
+            <?php if ($cond) : ?>
+                <h6><?= $symbol ?> <?= number_format($item['item_sale_price'] * $order['currency_value'],2) ?> <del><?= $symbol ?> <?= number_format(($item['item_price'] * $order['currency_value']),2) ?></del></h6>
+            <?php else : ?>
+                <h6><?= $symbol ?> <?= number_format($item['item_price'] * $order['currency_value'],2) ?></h6>
+            <?php endif; ?>
+        </div>
+
+        <div class="col-md-2 mt-2">
+            <h6><?= $item['product_quantity'] ?></h6>
+        </div>
+
+        <div class="col-md-2 mt-2">
+            <?php if ($cond) : ?>
+                <h6><?= $symbol ?> <?= number_format($item['item_sale_price'] * $item['product_quantity'] * $order['currency_value'],2) ?></h6>
+            <?php else : ?>
+                <h6><?= $symbol ?> <?= number_format($item['item_price'] * $item['product_quantity'] * $order['currency_value'],2) ?></h6>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!empty($item['delivery_items'])): ?>
+            <?php foreach ($item['delivery_items'] as $delivery): ?>
+                <div class="row mt-3 p-2 bg-light rounded border align-items-start" style="margin:0px;">
+                    <div class="col-md-8">
+                        <strong class="d-block mb-1">Address Details <?= $delivery['label'] ?>:</strong>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span><strong>Name:</strong> <?= $delivery['name'] ?></span>
+                            <span><strong>Phone:</strong> <?= $delivery['phone'] ?></span>
+                            <span><strong>Address:</strong> <?= $delivery['address'] ?></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <strong class="d-block mb-1">Delivery Details:</strong>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span><strong>Date:</strong> <?= $delivery['delivery_date'] ?></span>
+                            <span><strong>Time:</strong> <?= $delivery['delivery_time'] ?></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+    </div>
+
+<?php endforeach; ?>
+
+<?php
+if (!in_array(Auth::user()->role_id, [1, 2])) {
+    $subtotal = $itemtotal - $productsdiscount;
+    $vat = $subtotal * 0.05;
+    $total = $subtotal + $vat;
+    if(isset($settings['admin_commission'])){
+        $comission = ($settings['admin_commission'] / 100) * $subtotal;
+    }
+} else {
+    $vat = $order['vat'];
+}
+?>
+
+<?php if ($productsdiscount != 0) : ?>
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Items Total:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($itemtotal, 2) ?></h6>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Products Discount:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($productsdiscount, 2) ?></h6>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Item Subtotal:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($subtotal, 2) ?></h6>
+    </div>
+</div>
+
+<?php if ($order['coupon_amount'] != 0) : ?>
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Coupon (<?= $order['coupon_code'] ?>):</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3">- <?= $symbol ?> <?= number_format($order['coupon_amount'],2) ?></h6>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($order['credit_amount'] != 0 && $order['credit_amount'] != '' && $order['credit_amount'] != null) : ?>
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Credit:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3">-<?= $symbol ?> <?= number_format($order['credit_amount'] * $order['currency_value'], 2) ?></h6>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Shipping:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $order['shipping_cost'] == 0 ? 'Free Shipping' : $symbol . ' ' . number_format($order['shipping_cost'],2) ?></h6>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>VAT:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($vat, 2) ?></h6>
+    </div>
+</div>
+
+<?php if (!in_array(Auth::user()->role_id, [1, 2]) && isset($comission)): ?>
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Admin's Commission:</h5>
+    </div>
+    <div class="col-md-3 mt-3">
+        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($comission, 2) ?></h6>
+    </div>
+</div>
+<?php endif; ?>
+
+
+<div class="row">
+    <div class="col-md-6 mt-3"></div>
+    <div class="col-md-3 mt-3">
+        <h5>Order Total:</h5>
+    </div>
+<div class="col-md-3 mt-3">
+    <h6 class="text-end me-3">
+        <?= $symbol ?> 
+        <?php 
+            if(isset($comission)){
+                echo !in_array(Auth::user()->role_id, [1, 2]) ? number_format($total - $comission, 2) : number_format($total, 2);
+            } else {
+                echo number_format($total, 2);
+            }
+        ?>
+    </h6>
+</div>
+
+</div>
 
-                            $subtotal = $order['order_subtotal'];
-
-                            $total = $order['order_total'];
-
-                            $symbol = $order['currency'];
-
-                            foreach ($order['items'] as $item) :
-
-                                $cond = $item['item_sale_price'] != 0 && $item['item_sale_price'] != null;
-
-                                $price = $cond ? $item['item_sale_price'] * $order['currency_value'] * $item['product_quantity'] : $item['item_price'] * $order['currency_value'] * $item['product_quantity'];
-
-                                if ($cond) :
-
-                                    $defprice = $item['item_price'] * $order['currency_value'] * $item['product_quantity'];
-
-                                else :
-
-                                    $defprice = false;
-
-                                endif;
-
-                                $itemtotal += $defprice ? $defprice : $price;
-
-                                $productsdiscount += $defprice ? $defprice - $price  : 0; ?>
-
-                                <div class="row mb-3 p-3 border">
-
-                                    <div class="col-md-6 mt-2">
-
-                                        <div class="cart-item-meta">
-
-                                            <h5 class="text-capitalize"><?= $item['product_ID']['prod_title'] ?></h5>
-
-                                            <?php
-
-                                            if (!empty($item['item_meta'])) : $meta = '';
-
-                                                foreach ($item['item_meta'] as $key => $attr) :
-
-                                                    if ($attr['attribute'] != null) :
-
-                                                        $meta .= $attr['attribute']['attribute_title'] . ': ' . $attr['value']['value_title'] . ', ';
-
-                                                    else :
-
-                                                        if ($attr['value'] != ''):
-
-                                                            $meta .= '<br>Personalized Message: ' . $attr['value'];
-
-                                                        endif;
-
-                                                    endif;
-
-                                                endforeach; ?>
-
-                                                <p class="mb-2"><?= rtrim($meta, ', ') ?></p>
-
-                                            <?php endif; ?>
-
-                                        </div>
-
-                                    </div>
-                                    <div class="col-md-2 mt-2">
-
-                                        <?php if ($cond) : ?>
-
-                                            <h6><?= $symbol ?> <?= number_format($item['item_sale_price'] * $order['currency_value'],2) ?> <del><?=$symbol?> <?=number_format(($item['item_price'] * $order['currency_value']),2)?></del></h6>
-
-                                        <?php else : ?>
-
-                                            <h6><?= $symbol ?> <?= number_format($item['item_price'] * $order['currency_value'],2) ?></h6>
-
-                                        <?php endif; ?>
-
-                                    </div>
-
-                                    <div class="col-md-2 mt-2">
-                                        <h6><?= $item['product_quantity'] ?></h6>
-                                    </div>
-
-                                    <div class="col-md-2 mt-2">
-
-                                        <?php if ($cond) : ?>
-
-                                            <h6><?= $symbol ?> <?= number_format($item['item_sale_price'] * $item['product_quantity'] * $order['currency_value'],2) ?></h6>
-
-                                        <?php else : ?>
-
-                                            <h6><?= $symbol ?> <?= number_format($item['item_price'] * $item['product_quantity'] * $order['currency_value'],2) ?></h6>
-
-                                        <?php endif; ?>
-
-                                    </div>
-                                    <?php if (!empty($item['delivery_items'])): ?>
-                                        <?php foreach ($item['delivery_items'] as $delivery): ?>
-                                            <div class="row mt-3 p-2 bg-light rounded border align-items-start" style="margin:0px;">
-                                                <!-- Address Info -->
-                                                <div class="col-md-8">
-                                                    <strong class="d-block mb-1">Address Details <?= $delivery['label'] ?>:</strong>
-                                                    <div class="d-flex flex-wrap gap-2">
-                                                        <span><strong>Name:</strong> <?= $delivery['name'] ?></span>
-                                                        <span><strong>Phone:</strong> <?= $delivery['phone'] ?></span>
-                                                        <span><strong>Address:</strong> <?= $delivery['address'] ?></span>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Delivery Info -->
-                                                <div class="col-md-4">
-                                                    <strong class="d-block mb-1">Delivery Details:</strong>
-                                                    <div class="d-flex flex-wrap gap-2">
-                                                        <span><strong>Date:</strong> <?= $delivery['delivery_date'] ?></span>
-                                                        <span><strong>Time:</strong> <?= $delivery['delivery_time'] ?></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-
-                            <?php endforeach; ?>
-
-                            <?php
-
-                            if ($productsdiscount != 0) : ?>
-
-                                <div class="row">
-
-                                    <div class="col-md-6 mt-3"></div>
-                                    <div class="col-md-3 mt-3">
-                                        <h5>Items Total:</h5>
-                                    </div>
-                                    <div class="col-md-3 mt-3">
-                                        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($itemtotal, 2) ?></h6>
-                                    </div>
-
-                                </div>
-
-                                <div class="row">
-
-                                    <div class="col-md-6 mt-3"></div>
-                                    <div class="col-md-3 mt-3">
-                                        <h5>Products Discount:</h5>
-                                    </div>
-                                    <div class="col-md-3 mt-3">
-                                        <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($productsdiscount, 2) ?></h6>
-                                    </div>
-
-                                </div>
-
-                            <?php endif; ?>
-
-                            <div class="row">
-                                <div class="col-md-6 mt-3"></div>
-                                <div class="col-md-3 mt-3">
-                                    <h5>Item Subtotal:</h5>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($subtotal,2) ?></h6>
-                                </div>
-
-                            </div>
-
-                            <?php
-
-                            if ($order['coupon_amount'] != 0) : ?>
-
-                                <div class="row">
-
-                                    <div class="col-md-6 mt-3"></div>
-                                    <div class="col-md-3 mt-3">
-                                        <h5>Coupon (<?= $order['coupon_code'] ?>):</h5>
-                                    </div>
-                                    <div class="col-md-3 mt-3">
-                                        <h6 class="text-end me-3">- <?= $symbol ?> <?= number_format($order['coupon_amount'],2) ?></h6>
-                                    </div>
-
-                                </div>
-
-                            <?php endif; ?>
-
-                            <?php
-
-                            if ($order['credit_amount'] != 0 && $order['credit_amount'] != '' && $order['credit_amount'] != null) : ?>
-
-                                <div class="row">
-
-                                    <div class="col-md-6 mt-3"></div>
-                                    <div class="col-md-3 mt-3">
-                                        <h5>Credit:</h5>
-                                    </div>
-                                    <div class="col-md-3 mt-3">
-                                        <h6 class="text-end me-3">-<?= $symbol ?> <?= number_format($order['credit_amount'] * $order['currency_value'], 2) ?></h6>
-                                    </div>
-
-                                </div>
-
-                            <?php endif; ?>
-
-                            <div class="row">
-
-                                <div class="col-md-6 mt-3"></div>
-                                <div class="col-md-3 mt-3">
-                                    <h5>Shipping:</h5>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <h6 class="text-end me-3"><?= $order['shipping_cost'] == 0 ? 'Free Shipping' : $symbol . ' ' . number_format($order['shipping_cost'],2) ?></h6>
-                                </div>
-
-                            </div>
-
-                            <div class="row">
-
-                                <div class="col-md-6 mt-3"></div>
-                                <div class="col-md-3 mt-3">
-                                    <h5>VAT:</h5>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($order['vat'], 2) ?></h6>
-                                </div>
-
-                            </div>
-
-                            <div class="row">
-
-                                <div class="col-md-6 mt-3"></div>
-                                <div class="col-md-3 mt-3">
-                                    <h5>Order Total:</h5>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <h6 class="text-end me-3"><?= $symbol ?> <?= number_format($total, 2) ?></h6>
-                                </div>
-
-                            </div>
 
                     </div>
 

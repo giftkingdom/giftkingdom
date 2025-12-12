@@ -205,7 +205,7 @@ if (Auth::check()) {
                                 </div>
                             </div>
 
-<a href="<?= asset('cart') ?>" class="position-relative d-inline-block">
+<a href="<?= asset('cart') ?>" class="position-relative d-inline-block cart-icon">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -219,11 +219,10 @@ if (Auth::check()) {
     @php
         $cartItemCount = count(Setting::commonContent()['cartMenu']->cart_items ?? []);
     @endphp
-    @if ($cartItemCount > 0)
         <span class="badge rounded-pill bg-danger text-white position-absolute top-0 start-100 translate-middle p-1 px-2 small">
-            {{ $cartItemCount > 99 ? '99+' : $cartItemCount }}
+
+                {{ $cartItemCount > 99 ? '99+' : $cartItemCount }}
         </span>
-    @endif
 </a>
 
                             <a href="<?= asset('wishlist') ?>">

@@ -102,7 +102,6 @@ class Wishlist extends Model{
 		endif;
 
 		$data['serial'] = $data['serial'] ?? '';
-
 		$response = WishlistItems::addOrRemoveItem($wishid,$data['id'] , $data['var_id'] , $var , $data['serial']);
 
 		return $response;

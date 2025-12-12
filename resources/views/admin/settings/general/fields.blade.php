@@ -526,6 +526,30 @@
 
                 </div>
             </div>
+                      <div class="col-md-12">
+                <div class="form-group mb-3">
+
+                    <label for="admin_commission" class="control-label mb-1">
+
+                        Set Your Comission Rate
+
+                    </label>
+
+                    <?php
+
+                    isset($result['commonContent']['setting']['admin_commission']) ?
+
+                        $admin_commission = $result['commonContent']['setting']['admin_commission'] :
+
+                        $admin_commission = ''; ?>
+
+
+                    <input type="number" name="admin_commission" class="form-control"
+
+                        id="admin_commission" value="{{$admin_commission}}">
+
+                </div>
+            </div>
   <div class="col-md-2">
     <div class="form-group mt-3">
         <label for="footer_brand_image_one" class="control-label mb-1">

@@ -163,7 +163,7 @@ public function getCustomersTotal(Request $request)
 
     public function getLowStockProducts(Request $request)
     {
-        $perPage = $request->input('length', 10); // DataTables uses 'length' for page size
+        $perPage = $request->input('length', 10);
         $start = $request->input('start', 0);
         $draw = $request->input('draw');
         $search = $request->input('search.value');
@@ -173,7 +173,7 @@ public function getCustomersTotal(Request $request)
             ['prod_quantity', '!=', 0],
         ]);
 
-        if (Auth::user()->role_id != 1) {
+        if (Auth::user()->role_id == 4) {
             $query->where('author_id', Auth::user()->id);
         }
 
@@ -315,7 +315,7 @@ public function salesReport(Request $request)
 
         $query = Products::where('prod_quantity', 0);
 
-        if (Auth::user()->role_id != 1) {
+        if (Auth::user()->role_id == 4) {
             $query->where('author_id', Auth::user()->id);
         }
 

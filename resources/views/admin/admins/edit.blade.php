@@ -84,7 +84,7 @@
 
                                     <label for="name" class="control-label mb-1">Email</label>
 @if($data['role_id'] != 1) 
-                                    <input type="email" name="email" class="form-control" value="<?=$data['email']?>" required readonly>
+                                    <input type="email" name="email" class="form-control" value="<?=$data['email']?>" required>
 @else
                                     <input type="email" name="email" class="form-control" value="<?=$data['email']?>" required>
                                     @endif
@@ -98,7 +98,7 @@
 
                                     <label for="name" class="control-label mb-1">Phone</label>
 
-                                    <input type="number" name="phone" class="form-control" value="<?=$data['phone']?>" required>
+                                    <input type="number" name="phone" class="form-control" value="<?=$data['phone']?>">
 
                                 </div>
 

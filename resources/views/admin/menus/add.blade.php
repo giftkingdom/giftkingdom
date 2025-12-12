@@ -16,23 +16,15 @@
     <section class="content">
         <div class="box">
 
-            @if (count($errors) > 0)
-            <div class="box box-info">
+@if(session()->has('success'))
 
+                    <div class="alert alert-success">
 
-                @if($errors->any())
-                
-                <div class="alert alert-success alert-dismissible" role="alert">
+                        {{ session()->get('success') }}
 
-                    {{$errors->first()}}
+                    </div>
 
-                </div>
-                
-                @endif
-                
-            </div>
-
-            @endif
+                    @endif
 
 
             {!! Form::open(array('url' =>'admin/addnewmenu', 'method'=>'post', 'class' => 'form-horizontal form-validate', 'enctype'=>'multipart/form-data')) !!}

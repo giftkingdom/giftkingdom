@@ -32,6 +32,7 @@ class OrdersController extends Controller
 		$start = $request->input('start', 0);
 		$draw = $request->input('draw');
 		$search = $request->input('search.value');
+    $settings = \App\Models\Core\Setting::getWebSettings();
 
 		if (!in_array(Auth::user()->role_id, [1, 2])) {
 			$authorOrderIDs = Orderitems::where('author_id', Auth()->user()->id)->pluck('order_ID')->toArray();
@@ -64,38 +65,57 @@ class OrdersController extends Controller
 		$data = [];
 
 		foreach ($orders as $index => $order) {
-			$orderTotal = 0;
+    $orderTotal = 0;
+    $subtotal = 0;
+    $productsDiscount = 0;
 
-			if (!in_array(Auth::user()->role_id, [1, 2])) {
-				$items = Orderitems::where([
-					['author_id', Auth()->user()->id],
-					['order_ID', $order->ID]
-				])->get();
+    if (!in_array(Auth::user()->role_id, [1, 2])) {
+        $items = Orderitems::where([
+            ['author_id', Auth()->user()->id],
+            ['order_ID', $order->ID]
+        ])->get();
 
-				foreach ($items as $item) {
-					$orderTotal += $item->item_price;
-				}
-			} else {
-				$orderTotal = $order->order_total;
-			}
+        foreach ($items as $item) {
+            $cond = $item->item_sale_price != 0 && $item->item_sale_price != null;
+            $price = $cond ? $item->item_sale_price * $order->currency_value * $item->product_quantity : $item->item_price * $order->currency_value * $item->product_quantity;
 
-			$data[] = [
-				'id' => $order->ID,
-				'email' => $order->email,
-				'created_at' => $order->created_at->format('d M, Y'),
-				'order_status' => $order->order_status,
-				'order_total' => $order->currency . ' ' . number_format($orderTotal, 2),
-				'origin' => $order->ordered_source == 1 ? 'Website' : 'App',
-				'action' => '
-				<a title="Edit" href="' . asset('admin/orders/edit/' . $order->ID) . '" class="badge bg-light-blue">
-				<i class="fa-solid fa-pen-to-square"></i>
-				</a>
-				<a href="javascript:delete_popup(\'' . asset('admin/orders/delete') . '\',' . $order->ID . ');" 
-				class="badge delete-popup bg-red">
-				<i class="fa fa-trash" aria-hidden="true"></i>
-				</a>'
-			];
-		}
+            $defprice = $cond ? $item->item_price * $order->currency_value * $item->product_quantity : false;
+            $subtotal += $defprice ? $defprice : $price;
+            $productsDiscount += $defprice ? $defprice - $price : 0;
+        }
+
+        $subtotal -= $productsDiscount;
+
+        $vat = $subtotal * 0.05;
+        $orderTotal = $subtotal + $vat;
+
+        if (isset($settings['admin_commission'])) {
+            $commission = ($settings['admin_commission'] / 100) * $subtotal;
+            $orderTotal -= $commission;
+        }
+
+    } else { 
+        $orderTotal = $order->order_total;
+    }
+
+    $data[] = [
+        'id' => $order->ID,
+        'email' => $order->email,
+        'created_at' => $order->created_at->format('d M, Y'),
+        'order_status' => $order->order_status,
+        'order_total' => $order->currency . ' ' . number_format($orderTotal, 2),
+        'origin' => $order->ordered_source == 1 ? 'Website' : 'App',
+        'action' => '
+            <a title="Edit" href="' . asset('admin/orders/edit/' . $order->ID) . '" class="badge bg-light-blue">
+            <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            <a href="javascript:delete_popup(\'' . asset('admin/orders/delete') . '\',' . $order->ID . ');" 
+            class="badge delete-popup bg-red">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+            </a>'
+    ];
+}
+
 
 		return response()->json([
 			'draw' => intval($draw),
@@ -383,7 +403,11 @@ $ordertotal += $vat;
 			->whereIn('order_status', ['Cancelled', 'Cancel Requested'])
 			->latest()
 			->value('comments');
+			                                    if(!in_array(Auth::user()->role_id, [1, 2])){
 		$items = Orderitems::where([['order_ID', $request->id], ['author_id', Auth()->user()->id]])->get();
+												}else{
+		$items = Orderitems::where([['order_ID', $request->id]])->get();
+												}
 
 		$items ? $items = $items->toArray() : '';
 

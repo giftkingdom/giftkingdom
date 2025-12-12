@@ -12646,3 +12646,9 @@ header .dropdown-menu {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
+ .error-message {
+        color: red;
+        font-size: 13px;
+        margin-top: 4px;
+    }

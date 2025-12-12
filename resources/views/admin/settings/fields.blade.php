@@ -2,7 +2,23 @@
 <h3 class="box-title">SEO</h3>
 
 <div class="row">
+    <div class="col-md-6">
 
+        <?php
+
+        $home_title = isset($result['commonContent']['setting']['home_title']) ?
+
+        $result['commonContent']['setting']['home_title'] : ''; ?>
+
+        <div class="form-group mb-3">
+
+            <label for="home_title" class="control-label mb-1">Title</label>
+
+            <input type="text" name="home_title" class="form-control" id="home_title" value="<?=$home_title?>">
+
+        </div>
+
+    </div>
     <div class="col-md-6">
 
         <?php

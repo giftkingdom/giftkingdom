@@ -188,7 +188,7 @@
 
                                 <label for="name" class="control-label mb-3">Title</label>
 
-                                <input type="text" name="term_title" class="pagetitle form-control form-data" required>
+                                <input type="text" name="term_title" class="pagetitle form-control form-data required">
 
                             </div>
 
@@ -198,7 +198,7 @@
 
                                 <label for="term_slug" class="control-label mb-3">Slug</label>
 
-                                <input type="text" name="slug" class="form-control form-data">
+                                <input type="text" name="slug" class="form-control form-data required">
 
                             </div>
 

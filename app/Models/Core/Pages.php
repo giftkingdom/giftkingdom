@@ -15,7 +15,6 @@ class Pages extends Model
   protected $table = 'pages';
 
   public static function deletepage($request) {
-
     self::where('page_id', $request->id)->delete();
 
     Content::where('page_id',$request->id)->delete();
@@ -55,44 +54,58 @@ class Pages extends Model
   }
 
 
-  public static function addnewwebpage($request)
-  { 
-
+public static function addnewwebpage($request)
+{ 
     $check = $request->all();
-    unset( $check[ '_token' ] );
-
+    unset($check['_token']);
     $check = array_filter($check);
-
-    $slug = str_replace(' ','-' ,trim($request->slug));
-    $slug = str_replace('_','-' ,$slug);
+    $slug = trim($request->slug);
+    $slug = str_replace([' ', '_'], '-', $slug);
+    $slug = strtolower($slug);
+    $slug = self::generateUniqueSlug($slug);
     $page_id = DB::table('pages')->insertGetId([
-     'slug'          =>   $slug,
-     'type'          =>   2,
-     'template'       =>   $check['template'],
-     'banner_text'   => isset($check['banner_text']) ? $check['banner_text'] : '',
-   ]);
-
-// dd($check);
-    foreach($check as $key => $value) :
-      is_array($value) ? $value = serialize($value) : '';
-      
-      $content = Content::create([
-
-        'content_key' => $key,
-
-        'content_value' => $value,
-
-        'content_type' =>  $check['template'],
-
-        'page_id' => $page_id,
-
-      ]);
+        'slug'          => $slug,
+        'type'          => 2,
+        'template'      => $check['template'],
+        'banner_text'   => isset($check['banner_text']) ? $check['banner_text'] : '',
+    ]);
+    foreach($check as $key => $value):
+        if (is_array($value)) {
+            $value = serialize($value);
+        }
+        Content::create([
+            'content_key'   => $key,
+            'content_value' => $value,
+            'content_type'  => $check['template'],
+            'page_id'       => $page_id,
+        ]);
 
     endforeach;
+}
 
+public static function generateUniqueSlug($baseSlug)
+{
+    $original = $baseSlug;
+    if (!DB::table('pages')->where('slug', $baseSlug)->exists()) {
+        return $baseSlug;
+    }
 
+    if (preg_match('/^(.*?)(\d+)$/', $baseSlug, $matches)) {
+        $base = $matches[1];
+        $num  = (int)$matches[2];
+    } else {
+        $base = $baseSlug;  
+        $num = 0;
+    }
 
-  }
+    do {
+        $num++;
+        $newSlug = $base . $num;
+    } while (DB::table('pages')->where('slug', $newSlug)->exists());
+
+    return $newSlug;
+}
+
 
   public static function editwebpage($request)
   {

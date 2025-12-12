@@ -10,18 +10,25 @@
 
     </section>
 
-<?php
-$condition = Auth::user()->role_id == 1;
+    <?php
+    use App\Models\Web\Usermeta;
 
-$arr = App\Models\Core\Setting::where('name','admin_access')->pluck('value')->first();
-$sidebar = unserialize($arr);
+    $condition = Auth::user()->role_id == 1;
 
-if ($condition) {
-    $dcond = '';
-} else {
-    $dcond = isset($sidebar['dashboard']) && $sidebar['dashboard'] == 'on' ? '' : 'd-none';
-}
-?>
+$arr = Usermeta::where('user_id', Auth::user()->id)->where('meta_key','access')->pluck('meta_value')->first();
+    $sidebar = unserialize($arr);
+
+    if (Auth::user()->role_id == 4) {
+        $dcond = '';
+    } else {
+        if ($condition) {
+            $dcond = '';
+        } else {
+            $dcond = isset($sidebar['dashboard']) && $sidebar['dashboard'] == 'on' ? '' : 'd-none';
+        }
+    }
+
+    ?>
     <section class="content <?= $dcond ?>">
 
 
@@ -31,7 +38,13 @@ if ($condition) {
 
             <?php $col = $condition ? '12' : '12'; ?>
             <div class="col-md-<?= $col ?>">
-                <?php $col = $condition ? '3' : '4'; ?>
+                <?php
+                if (Auth::user()->role_id == 4) {
+                    $col = '6';
+                } else {
+                    $col = $condition ? '3' : '4';
+                }
+                ?>
 
                 <div>
                     <div class="row">
@@ -71,54 +84,45 @@ if ($condition) {
                                                 <i class="fa-solid fa-wallet"></i>
                                             </span>
                                         </div>
-                                        <h3 class="mb-0">AED <?= number_format($result['gross_sales'],2) ?></h3>
+                                        <h3 class="mb-0">AED <?= number_format($result['gross_sales'], 2) ?></h3>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-<?= $col ?> col-xs-6">
-
-                            <div class="card mb-4">
-
-                                <div class="card-body card-inner">
-                                    <h5 class="text-muted text-uppercase text-center" title="Number of Orders">Customers</h5>
-
-                                    <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1 flex-column">
-                                        <div class="user-img fs-42 flex-shrink-0">
-                                            <span class="avatar-title text-bg-white rounded-circle fs-22">
-                                                <i class="fa-solid fa-receipt"></i>
-                                            </span>
+                        <?php if (Auth::user()->role_id != 4): ?>
+                            <div class="col-lg-<?= $col ?> col-xs-6">
+                                <div class="card mb-4">
+                                    <div class="card-body card-inner">
+                                        <h5 class="text-muted text-uppercase text-center" title="Number of Orders">Customers</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1 flex-column">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-white rounded-circle fs-22">
+                                                    <i class="fa-solid fa-receipt"></i>
+                                                </span>
+                                            </div>
+                                            <h3 class="mb-0"><?= $result['customer_count'] ?></h3>
                                         </div>
-                                        <h3 class="mb-0"><?= $result['customer_count'] ?></h3>
-
                                     </div>
                                 </div>
-
-
                             </div>
 
-                        </div>
-                        <div class="col-lg-<?= $col ?> col-xs-6">
-
-                            <div class="card mb-4">
-
-                                <div class="card-body card-inner">
-                                    <h5 class="text-muted text-uppercase text-center" title="Number of Orders">Number of Visits</h5>
-
-                                    <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1 flex-column">
-                                        <div class="user-img fs-42 flex-shrink-0">
-                                            <span class="avatar-title text-bg-white rounded-circle fs-22">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </span>
+                            <div class="col-lg-<?= $col ?> col-xs-6">
+                                <div class="card mb-4">
+                                    <div class="card-body card-inner">
+                                        <h5 class="text-muted text-uppercase text-center" title="Number of Orders">Number of Visits</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1 flex-column">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-white rounded-circle fs-22">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </span>
+                                            </div>
+                                            <h3 class="mb-0"><?= $result['analytics']['user']['pagevisitsz'] ?></h3>
                                         </div>
-                                        <h3 class="mb-0"><?= $result['analytics']['user']['pagevisitsz'] ?></h3>
                                     </div>
                                 </div>
-
-
                             </div>
+                        <?php endif; ?>
 
-                        </div>
 
 
 
@@ -127,7 +131,7 @@ if ($condition) {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-{{ Auth::user()->role_id == 4 ? '12' : '8' }}">
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Overview</h4>
@@ -137,7 +141,7 @@ if ($condition) {
                                     <div class="col-md-3 ms-3 col-6">
                                         <p class="text-muted mt-3 text-start mb-1">Revenue</p>
                                         <h4 class="mb-3">
-                                            <span>AED <?= number_format($result['gross_sales'],2) ?></span>
+                                            <span>AED <?= number_format($result['gross_sales'], 2) ?></span>
                                         </h4>
                                     </div>
                                 </div>
@@ -347,65 +351,53 @@ if ($condition) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-{{ Auth::user()->role_id == 4 ? '12' : '8' }}">
                     <div class="card mt-4 card-h-100" style="max-height: 335px;overflow: auto;">
                         <div class="card-header d-flex flex-wrap align-items-center gap-2 border-bottom border-dashed">
                             <h4 class="header-title m-0">Top Selling Products</h4>
-
-
                         </div>
 
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-custom align-middle table-nowrap table-hover mb-0">
                                     <tbody>
-                                        <?php foreach ($result['products']  as $product):
-
-                                            $title = explode(' ', $product['prod_title']);
-
-                                            $str = '';
-
-                                            foreach ($title as $key => $word) :
-
-                                                if ($key < 4) :
-
-                                                    $str .= $word . ' ';
-
-                                                endif;
-
-                                            endforeach; ?>
-
+                                        @foreach ($result['products'] as $product)
+                                        @php
+                                        $title = explode(' ', $product['prod_title']);
+                                        $str = '';
+                                        foreach ($title as $key => $word) {
+                                        if ($key < 4) $str .=$word . ' ' ;
+                                            }
+                                            @endphp
                                             <tr>
-                                                <td>
-                                                    <div class="avatar-lg col-md-4">
-                                                        <img src="<?= asset($product['prod_image']) ?>" alt="Product-1" class="img-fluid rounded-2">
-                                                    </div>
-                                                </td>
-                                                <td class="ps-0">
-                                                    <h5 class="fs-14 my-1">
-                                                        <a href="<?= asset('admin/product/edit/' . $product['ID']) ?>" class="link-reset"><?= rtrim($str, ' ') ?></a>
-                                                    </h5>
-                                                    <span class="text-muted fs-12"><?= date('d M, Y', strtotime($product['created_at'])) ?></span>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1">AED <?= number_format($product['price'],2) ?></h5>
-                                                    <span class="text-muted fs-12">Price</span>
-                                                </td>
-                                                <td>
-                                                    <h5 class="fs-14 my-1"><?= $product['prod_quantity']?></h5>
-                                                    <span class="text-muted fs-12">Stock</span>
-                                                </td>
+                                            <td style="width: 150px;">
+                                                <div class="avatar-lg col-md-4">
+                                                    <img src="{{ asset($product['prod_image']) }}" alt="Product-1" class="img-fluid rounded-2">
+                                                </div>
+                                            </td>
+                                            <td class="ps-0" style="width: 150px;">
+                                                <h5 class="fs-14 my-1">
+                                                    <a href="{{ asset('admin/product/edit/' . $product['ID']) }}" class="link-reset">{{ rtrim($str) }}</a>
+                                                </h5>
+                                                <span class="text-muted fs-12">{{ date('d M, Y', strtotime($product['created_at'])) }}</span>
+                                            </td>
+                                            <td style="width: 150px;">
+                                                <h5 class="fs-14 my-1">AED {{ number_format($product['price'],2) }}</h5>
+                                                <span class="text-muted fs-12">Price</span>
+                                            </td>
+                                            <td style="width: 150px;">
+                                                <h5 class="fs-14 my-1">{{ $product['prod_quantity'] }}</h5>
+                                                <span class="text-muted fs-12">Stock</span>
+                                            </td>
                                             </tr>
-                                        <?php endforeach; ?>
-
+                                            @endforeach
                                     </tbody>
                                 </table>
-                            </div> <!-- end table-responsive-->
-                        </div> <!-- end card-body-->
-
-
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 <div class="col-md-4 d-none">
                     <!-- <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center border-bottom border-dashed">
@@ -461,47 +453,40 @@ if ($condition) {
                         </div>
                     </div>
                 </div>
+                @if(Auth::user()->role_id != 4)
                 <div class="col-md-4">
                     <div class="card mt-4">
                         <div class="d-flex card-header justify-content-between align-items-center">
                             <h4 class="header-title mb-0">New Customers</h4>
-
                         </div>
                         <div class="card-body p-0" style="max-height: 294px;overflow: auto;">
                             <div class="table-responsive">
                                 <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
                                     <tbody>
-                                        <?php foreach ($result['customers']  as $customer):
-                                        ?>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-
-                                                        <div>
-                                                            <span class="text-muted fs-12">Name</span> <br>
-                                                            <h5 class="fs-14 mt-1">{{$customer['first_name']}} {{$customer['last_name']}}</h5>
-                                                        </div>
+                                        @foreach ($result['customers'] as $customer)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <span class="text-muted fs-12">Name</span> <br>
+                                                        <h5 class="fs-14 mt-1">{{ $customer['first_name'] }} {{ $customer['last_name'] }}</h5>
                                                     </div>
-                                                </td>
-
-
-                                                <td>
-                                                    <span class="text-muted fs-12">Email</span>
-                                                    <h5 class="fs-14 mt-1 fw-normal">{{$customer['email']}}</h5>
-                                                </td>
-
-                                            </tr>
-                                        <? endforeach; ?>
-
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted fs-12">Email</span>
+                                                <h5 class="fs-14 mt-1 fw-normal">{{ $customer['email'] }}</h5>
+                                            </td>
+                                        </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div> <!-- end table-responsive-->
                         </div> <!-- end card-body-->
-
-
-
                     </div>
                 </div>
+                @endif
+
             </div>
 
         </div>

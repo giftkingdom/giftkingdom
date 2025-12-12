@@ -143,20 +143,19 @@ public static function addnewmenu($request)
 {
     $order = DB::table('menus')->max('sort_order') + 1;
 
-    // Determine the correct link
     if ($request->type == 2) {
-        // Fetch the category slug
         $category = Categories::where('category_ID', $request->category)->first();
         $slug = $category ? $category->categories_slug : null;
 
-        // Optionally prepend the path
         $link = asset('shop/category/') . '/' . $slug;
 
     } else {
-        $link = $request->link ?? $request->external_link;
+        $link = $request->external_link  ?? $request->link;
     }
-
-    // Prepare insert array
+$alreadyExists = DB::table('menus')->where('type', $request->type)->where('link', $link)->first();
+if($alreadyExists){
+    return redirect()->back()->with('error','Menu Already Exists');
+}else{
     $arr = [
         'parent_id' => 0,
         'type' => $request->type,
@@ -167,13 +166,12 @@ public static function addnewmenu($request)
         'menu' => $request->menu,
         'sort_order' => $order
     ];
+}
 
-    // Store page ID if category-based
     if ($request->type == 2) {
         $arr['page_id'] = $request->category;
     }
 
-    // Insert into DB
     $menu_id = DB::table('menus')->insertGetId($arr);
 }
 

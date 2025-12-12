@@ -38,7 +38,6 @@ class Products extends Model
         if (isset($request->category)) :
 
             $category = Categories::where('categories_slug', $request->category)->pluck('category_ID')->first();
-
             $return['category'] = $category;
 
             $arr = ProductsToCategories::where('category_ID', $category)->get('product_ID');
@@ -154,8 +153,17 @@ class Products extends Model
 
             endif;
 
-            $item['prod_image'] = Index::get_image_path($item['prod_image']);
+            if ($lang != 1) {
+                $image = Postmeta::where([['posts_id', $item['ID']], ['lang', $lang], ['meta_key', 'prod_image']])->pluck('meta_value')->first();
+                if ($image) {
 
+                    $item['prod_image'] = Index::get_image_path($image);
+                } else {
+                    $item['prod_image'] = Index::get_image_path($item['prod_image']);
+                }
+            } else {
+                $item['prod_image'] = Index::get_image_path($item['prod_image']);
+            }
             if ($item['prod_type'] == 'variable') :
 
                 // $variation = Products::getFirstVariation($item['ID']);
@@ -203,8 +211,17 @@ class Products extends Model
 
             endif;
 
-            $item['prod_image'] = Index::get_image_path($item['prod_image']);
+            if ($lang != 1) {
+                $image = Postmeta::where([['posts_id', $item['ID']], ['lang', $lang], ['meta_key', 'prod_image']])->pluck('meta_value')->first();
+                if ($image) {
 
+                    $item['prod_image'] = Index::get_image_path($image);
+                } else {
+                    $item['prod_image'] = Index::get_image_path($item['prod_image']);
+                }
+            } else {
+                $item['prod_image'] = Index::get_image_path($item['prod_image']);
+            }
             if ($item['prod_type'] == 'variable') :
 
                 // $variation = Products::getFirstVariation($item['ID']);
@@ -343,6 +360,7 @@ class Products extends Model
 
     public static function getPrice($product)
     {
+
         if (is_array($product)) {
             $regular = $product['prod_price'];
             $sale = $product['sale_price'];
@@ -504,42 +522,45 @@ class Products extends Model
 
         foreach ($data as &$item) :
 
-            // $item['prod_images'] = ['path' => Index::get_image_path($item['prod_images']), 'id' => $item['prod_images'] ];
-
+            // Handle translated title
             if ($lang != 1) :
-
-                $checkmeta = Postmeta::where([['posts_id', $item['ID']], ['lang', $lang], ['meta_key', 'prod_title']])->pluck('meta_value')->first();
+                $checkmeta = Postmeta::where([
+                    ['posts_id', $item['ID']],
+                    ['lang', $lang],
+                    ['meta_key', 'prod_title']
+                ])->pluck('meta_value')->first();
 
                 $item['prod_title'] = $checkmeta ?? $item['prod_title'];
-
             endif;
 
+            // Only replace the image if a translated version exists
+            if ($lang != 1) :
+                $checkImage = Postmeta::where([
+                    ['posts_id', $item['ID']],
+                    ['lang', $lang],
+                    ['meta_key', 'prod_image']
+                ])->pluck('meta_value')->first();
+
+                if (!empty($checkImage)) {
+                    $item['prod_image'] = Index::get_image_path($checkImage);
+                }
+            // ✅ If $checkImage is null, do nothing — keep the original $item['prod_image']
+            endif;
+
+            // Pricing logic
             if ($item['prod_type'] == 'variable') :
-
-                // $variation = self::getFirstVariation($item['ID']);
                 $variation = self::getMinimumPriceVariation($item['ID']);
-
-                // $item['default_variation'] = $variation['ID'];
-
                 $item['sale_price'] = $variation['sale_price'];
-
                 $item['prod_price'] = $variation['prod_price'];
-
                 $item['price'] = self::getPrice($variation);
-
             else :
-
                 $item['price'] = self::getPrice($item);
-
             endif;
 
             $item['discount'] = self::getDiscount($item);
 
-        // $item['wishlist'] = Wishlist::productExists($item['ID']);
-
-        // $item['review'] = Reviews::getRating($item['ID']);
-
         endforeach;
+
 
         return $data;
     }
@@ -575,6 +596,24 @@ class Products extends Model
         endforeach;
 
         $data['meta'] = $meta;
+        $Storearr = Usermeta::where('user_id', $data['author_id'])->get();
+
+        $Storearr ? $Storearr = $Storearr->toArray() : '';
+
+        $store_meta = [];
+        foreach ($Storearr as $item) :
+
+            if ($item['meta_key'] === 'store_logo_image' && !empty($item['meta_value'])) {
+                $item['meta_value'] = Index::get_image_path2($item['meta_value']);
+            }
+
+            $store_meta[$item['meta_key']] = $item['meta_value'];
+
+        endforeach;
+
+
+
+        $data['store_meta'] = $store_meta;
 
         if ($lang != 1) :
 
@@ -594,29 +633,28 @@ class Products extends Model
         if ($data['prod_type'] == 'variable') :
 
             $variations = self::getVariations($data['ID']);
-            // dd('a');
 
             $data['variations'] = Attributes::getAttributesAndValues($variations, $data['ID']);
 
-            $variation = array_shift($variations);
+            // Only shift if more than 1 variation
+            if (count($variations) > 1) {
+                $variation = array_shift($variations); // removes first item
+            } else {
+                $variation = $variations[0]; // just reference, keep array intact
+            }
 
             $data['default_variation'] = $variation['ID'];
-
-            $data['sale_price'] = $variation['sale_price'];
-
-            $data['prod_price'] = $variation['prod_price'];
+            $data['sale_price']        = $variation['sale_price'];
+            $data['prod_price']        = $variation['prod_price'];
 
             if (!empty($variations)) :
-
                 $item['price'] = self::getVarPrice($variations);
-
             else :
-
-                $item['price'] = (Products::getPrice($item));
-
+                $item['price'] = Products::getPrice($item);
             endif;
 
         endif;
+
         // dd($data);
 
         $data['wishlist'] = Wishlist::productExists($data['ID']);
@@ -805,160 +843,174 @@ class Products extends Model
 
         return json_encode($arr);
     }
-public static function suggestions($data)
-{
-    $keyword = $data['val'] ?? '';
-    $categoryId = $data['cat'] ?? null;
+    public static function suggestions($data)
+    {
+        $keyword = $data['val'] ?? '';
+        $categoryId = $data['cat'] ?? null;
+        $lang = session()->has('lang_id') ? session('lang_id') : 1;
 
-    $categories = Categories::select('category_ID', 'category_title')
-        ->where('parent_ID', 0)
-        ->get();
+        $categories = Categories::select('category_ID', 'category_title')
+            ->where('parent_ID', 0)
+            ->get();
 
-    // Translate category titles
-    if (session()->has('lang_id') && session('lang_id') != 1) {
-        foreach ($categories as &$cat) {
-            $translated = Termmeta::where([
-                ['taxonomy_id', 2147483647],
-                ['terms_id', $cat['category_ID']],
-                ['meta_key', 'category_title'],
-                ['lang', session('lang_id')],
-            ])->pluck('meta_value')->first();
+        // Translate category titles
+        if (session()->has('lang_id') && session('lang_id') != 1) {
+            foreach ($categories as &$cat) {
+                $translated = Termmeta::where([
+                    ['taxonomy_id', 2147483647],
+                    ['terms_id', $cat['category_ID']],
+                    ['meta_key', 'category_title'],
+                    ['lang', session('lang_id')],
+                ])->pluck('meta_value')->first();
 
-            if ($translated) {
-                $cat['category_title'] = $translated;
-            }
-        }
-    }
-
-    $data['categories'] = $categories->toArray();
-    $data['keyword'] = $keyword;
-    $data['recentproducts'] = [];
-    $data['popularproducts'] = [];
-
-    // ALWAYS set this upfront to avoid undefined key issues
-    $data['active_category_id'] = $categoryId ?? 0;
-
-    if (!empty($keyword)) {
-        $keywords = explode(' ', $keyword);
-        $baseQuery = self::query()
-            ->where('prod_type', '!=', 'variation')
-            ->where('prod_status', 'active');
-
-        foreach ($keywords as $word) {
-            $query = clone $baseQuery;
-            $query->where('prod_title', 'like', "%{$word}%");
-
-            if ($query->exists()) {
-                $products = $query->leftJoin('image_categories as categoryTable', 'categoryTable.image_id', '=', 'products.prod_image')
-                    ->select(
-                        'products.prod_image',
-                        'products.ID',
-                        'products.prod_slug',
-                        'products.prod_title',
-                        'products.prod_price',
-                        'products.sale_price',
-                        'products.prod_type',
-                        'products.price',
-                        'categoryTable.path as prod_image'
-                    )
-                    ->groupBy('products.ID')
-                    ->get()
-                    ->toArray();
-
-                foreach ($products as &$item) {
-                    if ($item['prod_type'] === 'variable') {
-                        $variation = Products::getMinimumPriceVariation($item['ID']);
-                        if ($variation) {
-                            $item['sale_price'] = $variation['sale_price'];
-                            $item['prod_price'] = $variation['prod_price'];
-                            $item['price'] = Products::getPrice($variation);
-                        } else {
-                            $item['price'] = null;
-                        }
-                    } else {
-                        $item['price'] = Products::getPrice($item);
-                    }
+                if ($translated) {
+                    $cat['category_title'] = $translated;
                 }
-
-                $data['products'] = $products;
-                return $data;
             }
         }
+
+        $data['categories'] = $categories->toArray();
+        $data['keyword'] = $keyword;
+        $data['recentproducts'] = [];
+        $data['popularproducts'] = [];
+
+        // ALWAYS set this upfront to avoid undefined key issues
+        $data['active_category_id'] = $categoryId ?? 0;
+
+        if (!empty($keyword)) {
+            $keywords = explode(' ', $keyword);
+            $baseQuery = self::query()
+                ->where('prod_type', '!=', 'variation')
+                ->where('prod_status', 'active');
+
+            foreach ($keywords as $word) {
+                $query = clone $baseQuery;
+                $query->where('prod_title', 'like', "%{$word}%");
+
+                if ($query->exists()) {
+                    $products = $query->leftJoin('image_categories as categoryTable', 'categoryTable.image_id', '=', 'products.prod_image')
+                        ->select(
+                            'products.prod_image',
+                            'products.ID',
+                            'products.prod_slug',
+                            'products.prod_title',
+                            'products.prod_price',
+                            'products.sale_price',
+                            'products.prod_type',
+                            'products.price',
+                            'categoryTable.path as prod_image'
+                        )
+                        ->groupBy('products.ID')
+                        ->get()
+                        ->toArray();
+
+                    foreach ($products as &$item) {
+                        if ($lang != 1) {
+                            $image = Postmeta::where([
+                                ['posts_id', $item['ID']],
+                                ['lang', $lang],
+                                ['meta_key', 'prod_image']
+                            ])->pluck('meta_value')->first();
+
+                            if (!empty($image)) {
+                                $item['prod_image'] = Index::get_image_path($image);
+                            }
+                        }
+
+                        if ($item['prod_type'] === 'variable') {
+                            $variation = Products::getMinimumPriceVariation($item['ID']);
+                            if ($variation) {
+                                $item['sale_price'] = $variation['sale_price'];
+                                $item['prod_price'] = $variation['prod_price'];
+                                $item['price'] = Products::getPrice($variation);
+                            } else {
+                                $item['price'] = null;
+                            }
+                        } else {
+                            $item['price'] = Products::getPrice($item);
+                        }
+                    }
+
+
+                    $data['products'] = $products;
+                    return $data;
+                }
+            }
+
+            $data['products'] = [];
+            return $data;
+        }
+
+        if (!empty($categoryId)) {
+            $query = ProductsToCategories::leftJoin('products', 'products.ID', '=', 'products_to_categories.product_ID')
+                ->where('products_to_categories.category_ID', $categoryId)
+                ->where('products.prod_type', '!=', 'variation')
+                ->where('products.prod_status', '=', 'active')
+                ->leftJoin('image_categories as categoryTable', 'categoryTable.image_id', '=', 'products.prod_image')
+                ->select(
+                    'products.prod_image',
+                    'products.ID',
+                    'products.prod_slug',
+                    'products.prod_title',
+                    'products.prod_price',
+                    'products.sale_price',
+                    'products.prod_type',
+                    'products.price',
+                    'categoryTable.path as prod_image'
+                )
+                ->groupBy('products.ID')
+                ->limit(5)
+                ->get()
+                ->toArray();
+
+            foreach ($query as &$item) {
+                if ($item['prod_type'] === 'variable') {
+                    $variation = Products::getMinimumPriceVariation($item['ID']);
+                    if ($variation) {
+                        $item['sale_price'] = $variation['sale_price'];
+                        $item['prod_price'] = $variation['prod_price'];
+                        $item['price'] = Products::getPrice($variation);
+                    } else {
+                        $item['price'] = null;
+                    }
+                } else {
+                    $item['price'] = Products::getPrice($item);
+                }
+            }
+
+            $data['products'] = $query;
+            return $data;
+        }
+
+        $analyticsWhere = [['user_ID', $_SERVER['REMOTE_ADDR']]];
+
+        $recentIds = SearchAnalytics::where($analyticsWhere)
+            ->groupBy('product_ID')
+            ->pluck('product_ID')
+            ->toArray();
+
+        $popularIds = SearchAnalytics::where($analyticsWhere)
+            ->groupBy('product_ID')
+            ->orderByRaw('COUNT(*) DESC, product_ID ASC')
+            ->limit(10)
+            ->pluck('product_ID')
+            ->toArray();
+
+        $data['recentproducts'] = self::select('ID', 'prod_title', 'prod_slug')
+            ->where('prod_status', 'active')
+            ->whereIn('ID', $recentIds)
+            ->get()
+            ->toArray();
+
+        $data['popularproducts'] = self::select('ID', 'prod_title', 'prod_slug')
+            ->where('prod_status', 'active')
+            ->whereIn('ID', $popularIds)
+            ->get()
+            ->toArray();
 
         $data['products'] = [];
         return $data;
     }
-
-    if (!empty($categoryId)) {
-        $query = ProductsToCategories::leftJoin('products', 'products.ID', '=', 'products_to_categories.product_ID')
-            ->where('products_to_categories.category_ID', $categoryId)
-            ->where('products.prod_type', '!=', 'variation')
-            ->where('products.prod_status', '=', 'active')
-            ->leftJoin('image_categories as categoryTable', 'categoryTable.image_id', '=', 'products.prod_image')
-            ->select(
-                'products.prod_image',
-                'products.ID',
-                'products.prod_slug',
-                'products.prod_title',
-                'products.prod_price',
-                'products.sale_price',
-                'products.prod_type',
-                'products.price',
-                'categoryTable.path as prod_image'
-            )
-            ->groupBy('products.ID')
-            ->limit(5)
-            ->get()
-            ->toArray();
-
-        foreach ($query as &$item) {
-            if ($item['prod_type'] === 'variable') {
-                $variation = Products::getMinimumPriceVariation($item['ID']);
-                if ($variation) {
-                    $item['sale_price'] = $variation['sale_price'];
-                    $item['prod_price'] = $variation['prod_price'];
-                    $item['price'] = Products::getPrice($variation);
-                } else {
-                    $item['price'] = null;
-                }
-            } else {
-                $item['price'] = Products::getPrice($item);
-            }
-        }
-
-        $data['products'] = $query;
-        return $data;
-    }
-
-    $analyticsWhere = [['user_ID', $_SERVER['REMOTE_ADDR']]];
-
-    $recentIds = SearchAnalytics::where($analyticsWhere)
-        ->groupBy('product_ID')
-        ->pluck('product_ID')
-        ->toArray();
-
-    $popularIds = SearchAnalytics::where($analyticsWhere)
-        ->groupBy('product_ID')
-        ->orderByRaw('COUNT(*) DESC, product_ID ASC')
-        ->limit(10)
-        ->pluck('product_ID')
-        ->toArray();
-
-    $data['recentproducts'] = self::select('ID', 'prod_title', 'prod_slug')
-        ->where('prod_status', 'active')
-        ->whereIn('ID', $recentIds)
-        ->get()
-        ->toArray();
-
-    $data['popularproducts'] = self::select('ID', 'prod_title', 'prod_slug')
-        ->where('prod_status', 'active')
-        ->whereIn('ID', $popularIds)
-        ->get()
-        ->toArray();
-
-    $data['products'] = [];
-    return $data;
-}
 
 
 
@@ -1151,43 +1203,55 @@ public static function suggestions($data)
 
         foreach ($data['data'] as &$item) {
             $lang = session()->has('lang_id') ? session('lang_id') : 1;
+
+            // Handle translated title
             if ($lang != 1) {
                 $translatedTitle = Postmeta::where([
                     ['posts_id', $item['ID']],
                     ['meta_key', 'prod_title'],
                     ['lang', $lang]
                 ])->pluck('meta_value')->first();
+
                 $item['prod_title'] = $translatedTitle ?? $item['prod_title'];
             }
 
+            // Handle translated image ONLY if it exists
+            if ($lang != 1) {
+                $translatedImage = Postmeta::where([
+                    ['posts_id', $item['ID']],
+                    ['meta_key', 'prod_image'],
+                    ['lang', $lang]
+                ])->pluck('meta_value')->first();
+
+                if (!empty($translatedImage)) {
+                    $item['prod_image'] = $translatedImage;
+                }
+                // If empty, keep original $item['prod_image']
+            }
+
+            // Always resolve image path for display
             $item['prod_image'] = [
                 'path' => Index::get_image_path($item['prod_image']),
-                'id' => $item['prod_image']
+                'id'   => $item['prod_image']
             ];
 
+            // Pricing logic
             if ($item['prod_type'] == 'variable') :
-
                 $variation = self::getMinimumPriceVariation($item['ID']);
                 if ($variation):
-
                     $item['default_variation'] = $variation['ID'];
                     $item['sale_price'] = $variation['sale_price'];
-
                     $item['prod_price'] = $variation['prod_price'];
                     $item['price'] = Products::getPrice($variation);
                 endif;
-
-
-
             else :
-
                 $item['price'] = Products::getPrice($item);
-
             endif;
 
             $item['discount'] = self::getDiscount($item);
             $item['wishlist'] = Wishlist::productExists($item['ID']);
         }
+
 
         return ['data' => $data];
     }
@@ -1252,5 +1316,63 @@ public static function suggestions($data)
             return ['data' => $data, 'count' => $count, 'keyword' => ''];
 
         endif;
+    }
+
+    public static function getStoreProducts($author_id)
+    {
+        $products = Products::where('author_id', $author_id)->where('prod_status', 'active')->where('prod_type', '!=', 'variation')->pluck('ID');
+
+        $data = self::whereIn('ID', $products)->limit(3)->get();
+
+        $data ? $data = $data->toArray() : '';
+
+        $lang = session()->has('lang_id') ? session('lang_id') : 1;
+
+        foreach ($data as &$item) :
+
+            if ($lang != 1) :
+
+                $checkmeta = Postmeta::where([['posts_id', $item['ID']], ['lang', $lang], ['meta_key', 'prod_title']])->pluck('meta_value')->first();
+
+                $item['prod_title'] = $checkmeta ?? $item['prod_title'];
+
+            endif;
+
+            if ($lang != 1) {
+                $image = Postmeta::where([['posts_id', $item['ID']], ['lang', $lang], ['meta_key', 'prod_image']])->pluck('meta_value')->first();
+                if ($image) {
+
+                    $item['prod_image'] = Index::get_image_path($image);
+                } else {
+                    $item['prod_image'] = Index::get_image_path($item['prod_image']);
+                }
+            } else {
+                $item['prod_image'] = Index::get_image_path($item['prod_image']);
+            }
+
+            if ($item['prod_type'] == 'variable') :
+
+                // $variation = Products::getFirstVariation($item['ID']);
+                $variation = Products::getMinimumPriceVariation($item['ID']);
+
+                // $item['default_variation'] = $variation['ID'];
+
+                $item['sale_price'] = $variation['sale_price'];
+
+                $item['prod_price'] = $variation['prod_price'];
+
+                $item['price'] = Products::getPrice($variation);
+
+            else :
+
+                $item['price'] = Products::getPrice($item);
+
+            endif;
+
+            $item['discount'] = Products::getDiscount($item);
+
+        endforeach;
+
+        return $data;
     }
 }

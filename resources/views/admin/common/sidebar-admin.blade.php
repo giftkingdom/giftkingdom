@@ -1,6 +1,7 @@
 <?php 
 
 use App\Models\Core\Posttypes;
+use App\Models\Web\Usermeta;
 
 use App\Models\Core\Taxonomy;
 
@@ -8,10 +9,9 @@ use App\Models\Core\Setting;
 
 $posttypes = Posttypes::all();
 
-$arr = Setting::where('name','admin_access')->pluck('value')->first();
-
+// $arr = Setting::where('name','admin_access')->pluck('value')->first();
+$arr = Usermeta::where('user_id', Auth()->user()->id)->where('meta_key','access')->pluck('meta_value')->first();
 $sidebar = unserialize($arr); ?>
-
 
 <aside class="main-sidebar">
 
@@ -180,10 +180,20 @@ $sidebar = unserialize($arr); ?>
 
     $arr = ['category','deals','brands','attribute','product'];
 
-    foreach($arr as $uri) : str_contains(Route::current()->uri(), $uri) ? $active = 'active' : '';  endforeach; ?>
+    foreach($arr as $uri) : str_contains(Route::current()->uri(), $uri) ? $active = 'active' : '';  endforeach; 
+$catalogKeys = ['categories', 'deals', 'brands', 'attributes', 'products', 'inventory'];
+$showCatalog = false;
+foreach ($catalogKeys as $key) {
+    if (!empty($sidebar[$key]) && $sidebar[$key] === 'on') {
+        $showCatalog = true;
+        break;
+    }
+}
+    ?>
 
+<?php if ($showCatalog): ?>
 
-    <li class="treeview <?=$active?>">
+    <li class="treeview  <?=$active?>">
       <a href="#">
         <i class="fa fa-database"></i>
         <span>Catalog</span>
@@ -245,6 +255,7 @@ $sidebar = unserialize($arr); ?>
       </ul>
 
     </li>
+<?php endif; ?>
 
 
 
@@ -299,57 +310,81 @@ $sidebar = unserialize($arr); ?>
     </li>
 
 
-    <!-- Reports -->
 
-    <li class="treeview <?= str_contains(Route::current()->uri, 'reports') ? 'active' : '' ?>">
-      <a href="#">
-        <i class="fa-solid fa-scroll"></i>
-        <span>Reports</span>
-        <i class="fa fa-angle-left pull-right"></i>
+<?php
+$reportKeys = [
+  'low-stock-products',
+  'out-of-stock-products',
+  'customers-order-total',
+  'sales-report'
+];
+
+$showReports = false;
+
+foreach ($reportKeys as $key) {
+    if (isset($sidebar[$key]) && $sidebar[$key] === 'on') {
+        $showReports = true;
+        break;
+    }
+}
+?>
+
+<?php if ($showReports): ?>
+<li class="treeview <?= str_contains(Route::current()->uri(), 'reports') ? 'active' : '' ?>">
+  <a href="#">
+    <i class="fa-solid fa-scroll"></i>
+    <span>Reports</span>
+    <i class="fa fa-angle-left pull-right"></i>
+  </a>
+
+  <ul class="treeview-menu">
+
+    <?php $c = isset($sidebar['low-stock-products']) && $sidebar['low-stock-products'] === 'on' ? '' : 'd-none'; ?>
+    <li class="<?= $c ?> <?= Request::is('admin/reports/low-stock') ? 'active' : '' ?>">
+      <a href="<?= URL::to('admin/reports/low-stock') ?>">
+        <i class="fa-regular fa-circle-dot fa-sm"></i> Low Stock Products
       </a>
-      <ul class="treeview-menu">
-
-        <?php $c = isset($sidebar['low-stock-products']) && $sidebar['low-stock-products'] == 'on' ? '' : 'd-none';?>
-        
-        <li class="<?=$c?> <?= str_contains(Route::current()->uri, 'reports') ? 'active' : '' ?>">
-          <a href="<?= URL::to('admin/reports/low-stock')?>">
-            <i class="fa-regular fa-circle-dot fa-sm"></i> Low Stock Products
-          </a>
-        </li>
-        
-        <?php $c = isset($sidebar['out-of-stock-products']) && $sidebar['out-of-stock-products'] == 'on' ? '' : 'd-none';?>
-
-        <li class="<?=$c?> <?= str_contains(Route::current()->uri, 'reports') ? 'active' : '' ?>">
-          <a href="<?= URL::to('admin/reports/out-stock')?>">
-            <i class="fa-regular fa-circle-dot fa-sm"></i> Out of Stock Products
-          </a>
-        </li>
-
-
-        <?php $c = isset($sidebar['customers-order-total']) && $sidebar['customers-order-total'] == 'on' ? '' : 'd-none';?>
-
-        <li class="<?=$c?> <?= str_contains(Route::current()->uri, 'reports') ? 'active' : '' ?>">
-          <a href="<?= URL::to('admin/reports/customers')?>">
-            <i class="fa-regular fa-circle-dot fa-sm"></i> Customers Order Total
-          </a>
-        </li>
-
-        <?php $c = isset($sidebar['sales-report']) && $sidebar['sales-report'] == 'on' ? '' : 'd-none';?>
-
-        <li class="<?=$c?> <?= str_contains(Route::current()->uri, 'reports') ? 'active' : '' ?>">
-          <a href="<?= URL::to('admin/reports/sales-report')?>">
-            <i class="fa-regular fa-circle-dot fa-sm"></i> Sales Report
-          </a>
-        </li>
-
-
-
-      </ul>
     </li>
+
+    <?php $c = isset($sidebar['out-of-stock-products']) && $sidebar['out-of-stock-products'] === 'on' ? '' : 'd-none'; ?>
+    <li class="<?= $c ?> <?= Request::is('admin/reports/out-stock') ? 'active' : '' ?>">
+      <a href="<?= URL::to('admin/reports/out-stock') ?>">
+        <i class="fa-regular fa-circle-dot fa-sm"></i> Out of Stock Products
+      </a>
+    </li>
+
+    <?php $c = isset($sidebar['customers-order-total']) && $sidebar['customers-order-total'] === 'on' ? '' : 'd-none'; ?>
+    <li class="<?= $c ?> <?= Request::is('admin/reports/customers') ? 'active' : '' ?>">
+      <a href="<?= URL::to('admin/reports/customers') ?>">
+        <i class="fa-regular fa-circle-dot fa-sm"></i> Customers Order Total
+      </a>
+    </li>
+
+    <?php $c = isset($sidebar['sales-report']) && $sidebar['sales-report'] === 'on' ? '' : 'd-none'; ?>
+    <li class="<?= $c ?> <?= Request::is('admin/reports/sales-report') ? 'active' : '' ?>">
+      <a href="<?= URL::to('admin/reports/sales-report') ?>">
+        <i class="fa-regular fa-circle-dot fa-sm"></i> Sales Report
+      </a>
+    </li>
+
+  </ul>
+</li>
+<?php endif; ?>
+
 
     <!-- Customers -->
 
+    <?php $c = isset($sidebar['vendors']) && $sidebar['vendors'] == 'on' ? '' : 'd-none';?>
 
+    <li class="treeview <?=$c?> <?= Request::is('admin/vendors/display') ? 'active' : '' ?> <?= Request::is('admin/vendors/edit/*') ? 'active' : '' ?>">
+
+      <a href="<?= URL::to('admin/vendors/display')?>">
+
+        <i class="fa fa-users"></i> <span>Vendors</span>
+
+      </a>
+
+    </li>
 
     <?php $c = isset($sidebar['customers']) && $sidebar['customers'] == 'on' ? '' : 'd-none';?>
 
@@ -364,9 +399,9 @@ $sidebar = unserialize($arr); ?>
     </li>
             <?php $c = isset($sidebar['customer-wallet']) && $sidebar['customer-wallet'] == 'on' ? '' : 'd-none';?>
 
-     <li class="treeview  <?=$c?>  <?= Request::is('admin/customers/*') ? 'active' : '' ?>">
+     <li class="treeview  <?=$c?>  <?= Request::is('admin/customer-wallet-history/*') ? 'active' : '' ?>">
 
-  <a href="<?= URL::to('admin/customers/wallet')?>">
+  <a href="<?= URL::to('admin/customer-wallet-history')?>">
 
     <i class="fa-solid fa-wallet"></i> <span>Customer Wallet History</span>
 
@@ -442,48 +477,68 @@ $sidebar = unserialize($arr); ?>
       <span>App Labels</span>
   </a>
 </li>
-    <li class="treeview <?= Request::is('admin/setting') ? 'active' : '' ?>" >
-      <a href="javascript:;">
-        <i class="fa fa-gears" aria-hidden="true"></i>
-        <span>Tools</span> <i class="fa fa-angle-left pull-right"></i>
-      </a>
-      <ul class="treeview-menu">
-        <?php $c = isset($sidebar['settings']) && $sidebar['settings'] == 'on' ? '' : 'd-none';?>
-        <li class=" <?=$c?> <?= Request::is('admin/setting') ? 'active' : '' ?>">
-          <a href="<?= URL::to('admin/setting')?>">
-            <span>Settings</span>
-          </a>
-        </li>
-
-      </ul>
-    </li>
-<?php 
-    $c = isset($sidebar['contact-form']) && $sidebar['contact-form'] == 'on' ? '' : 'd-none';
-    $c2 = isset($sidebar['event-inquiry-form']) && $sidebar['event-inquiry-form'] == 'on' ? '' : 'd-none';
+    <?php
+$showTools = isset($sidebar['settings']) && $sidebar['settings'] === 'on';
 ?>
+
+<?php if ($showTools): ?>
+<li class="treeview <?= Request::is('admin/setting') ? 'active' : '' ?>">
+  <a href="javascript:;">
+    <i class="fa fa-gears" aria-hidden="true"></i>
+    <span>Tools</span>
+    <i class="fa fa-angle-left pull-right"></i>
+  </a>
+
+  <ul class="treeview-menu">
+    <li class="<?= Request::is('admin/setting') ? 'active' : '' ?>">
+      <a href="<?= URL::to('admin/setting') ?>">
+        <span>Settings</span>
+      </a>
+    </li>
+  </ul>
+</li>
+<?php endif; ?>
+
+<?php 
+$showContact = isset($sidebar['contact-form']) && $sidebar['contact-form'] === 'on';
+$showEvent   = isset($sidebar['event-inquiry-form']) && $sidebar['event-inquiry-form'] === 'on';
+
+$showFormsMenu = $showContact || $showEvent; // show menu only if at least one is on
+?>
+
+<?php if ($showFormsMenu): ?>
 <li class="treeview 
-    {{ Request::is('admin/contact-form') ? 'active' : '' }} {{ Request::is('admin/event-inquiries') ? 'active' : '' }}">
+    <?= Request::is('admin/contact-form') ? 'active' : '' ?> 
+    <?= Request::is('admin/event-inquiries') ? 'active' : '' ?>">
     
     <a href="#">
         <i class="fas fa-paper-plane" aria-hidden="true"></i>
         <span> Form Requests </span>
-        <i class="fa fa-angle-right pull-right"></i>
+        <i class="fa fa-angle-left pull-right"></i>
     </a>
 
     <ul class="treeview-menu">
-        <li class="treeview {{ Request::is('admin/contact-form') ? 'active' : '' }} {{ $c }}">
-            <a href="{{ url('admin/contact-form') }}">
+
+        <?php if ($showContact): ?>
+        <li class="treeview <?= Request::is('admin/contact-form') ? 'active' : '' ?>">
+            <a href="<?= url('admin/contact-form') ?>">
                 <i class="fas fa-circle"></i> <span>Contact Form</span>
             </a>
         </li>
+        <?php endif; ?>
 
-        <li class="treeview {{ Request::is('admin/event-inquiries') ? 'active' : '' }} {{ $c2 }}">
-            <a href="{{ url('admin/event-inquiries') }}">
+        <?php if ($showEvent): ?>
+        <li class="treeview <?= Request::is('admin/event-inquiries') ? 'active' : '' ?>">
+            <a href="<?= url('admin/event-inquiries') ?>">
                 <i class="fas fa-circle"></i> <span>Event Inquiries</span>
             </a>
         </li>
+        <?php endif; ?>
+
     </ul>
 </li>
+<?php endif; ?>
+
 
 
   </ul>

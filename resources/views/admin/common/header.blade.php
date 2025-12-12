@@ -81,10 +81,10 @@ $result['commonContent'] = $setting->commonContent(); ?>
 
               <div class="pull-right d-flex justify-content-between">
 
-
+    @if(in_array(Auth::user()->role_id, [1,2]))
 
                   <a href="<?=URL::to('admin/editadmin/'.Auth()->user()->id)?>" class="btn btn-primary btn-flat">Profile</a>
-
+@endif
                 
                 <a href="{{ URL::to('admin/logout')}}" class="btn btn-primary btn-flat">Sign out</a>
 

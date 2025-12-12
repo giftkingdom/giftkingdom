@@ -1,22 +1,21 @@
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script><!-- Jquery -->
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script><!-- FancyBox -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><!-- Bootstrap -->
-<script src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.4/sc-2.1.1/datatables.min.js"></script><!-- Datatables -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.13.4/sc-2.1.1/datatables.min.js"></script>
 <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script><!-- Charts -->
-<script src="{!! asset('admin/js/jquery.validate.js') !!}"></script><!-- Validate -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="{!! asset('admin/js/jquery.validate.js') !!}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script src="{!! asset('admin/plugins/datepicker/bootstrap-datepicker.js') !!}"></script><!-- Datepicker -->
-<script src="{!! asset('admin/plugins/colorpicker/bootstrap-colorpicker.min.js') !!}"></script><!-- Colorpicker -->
-<script src="{!! asset('admin/plugins/timepicker/bootstrap-timepicker.min.js') !!}"></script><!-- Timepicker -->
+<script src="{!! asset('admin/plugins/datepicker/bootstrap-datepicker.js') !!}"></script>
+<script src="{!! asset('admin/plugins/colorpicker/bootstrap-colorpicker.min.js') !!}"></script>
+<script src="{!! asset('admin/plugins/timepicker/bootstrap-timepicker.min.js') !!}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="{!! asset('admin/dist/js/app.min.js') !!}"></script><!-- App/AdminLte -->
-<script src="{{url('admin/js/clipboard.min.js')}}"></script><!-- AdmineLTE -->
-<script src="{{url('admin/dist/apex/apexcharts.min.js')}}"></script><!-- AdmineLTE -->
-<script src="{!! asset('admin/js/demo.js') !!}"></script><!-- AdmineLTE -->
-<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script><!-- Export To Excel -->
-<!-- DataTables + Buttons -->
+<script src="{!! asset('admin/dist/js/app.min.js') !!}"></script>
+<script src="{{url('admin/js/clipboard.min.js')}}"></script>
+<script src="{{url('admin/dist/apex/apexcharts.min.js')}}"></script>
+<script src="{!! asset('admin/js/demo.js') !!}"></script>
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
@@ -31,6 +30,20 @@
 	}
 </style>
 <script>
+document.getElementById('selectAll').addEventListener('click', function() {
+    const checkboxes = document.querySelectorAll('.form-checkbox');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = true;
+    });
+});
+
+document.getElementById('unselectAll').addEventListener('click', function() {
+    const checkboxes = document.querySelectorAll('.form-checkbox');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = false;
+    });
+});
+
     $(document).on('click', '.remove-product-item', function () {
         $(this).closest('.product-item').remove();
     });
@@ -51,8 +64,9 @@ th:has(.select-all)::after {
 }
 
 </style>
-<script>
+{{-- <script>
 document.addEventListener('DOMContentLoaded', function () {
+	console.log('inside this:');
     // Get all the variant blocks
     const variantBlocks = document.querySelectorAll('.variations-append');
 
@@ -63,18 +77,76 @@ document.addEventListener('DOMContentLoaded', function () {
         function updateSaleMax() {
             const prodPrice = parseFloat(prodInput.value);
             if (!isNaN(prodPrice)) {
+				console.log('price comes here:');
+				console.log(prodPrice);
                 saleInput.max = prodPrice - 1;
             }
         }
 
         // Set initial max
+		console.log('updating intial max attr');
         updateSaleMax();
 
         // Update max when prod_price changes
         prodInput.addEventListener('input', updateSaleMax);
     });
 });
+</script> --}}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const requiredFields = document.querySelectorAll(".required");
+
+    requiredFields.forEach(field => {
+        field.addEventListener("blur", () => validateField(field));
+    });
+
+    document.querySelectorAll("form").forEach(form => {
+        form.addEventListener("submit", function (e) {
+            let hasError = false;
+            let firstInvalid = null;
+
+            const fields = form.querySelectorAll(".required");
+
+            fields.forEach(field => {
+                if (!validateField(field)) {
+                    hasError = true;
+
+                    if (!firstInvalid) {
+                        firstInvalid = field;
+                    }
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+
+                if (firstInvalid) {
+                    // Switch to the tab containing the first invalid field
+                    const tabContent = firstInvalid.closest(".tab");
+                    if (tabContent) {
+                        // Remove active from all tabs
+                        document.querySelectorAll(".tabs-nav li").forEach(li => li.classList.remove("active"));
+                        document.querySelectorAll(".tabs-content .tab").forEach(tab => tab.classList.remove("active"));
+
+                        // Activate the tab with the first invalid field
+                        tabContent.classList.add("active");
+                        const tabId = "#" + tabContent.id;
+                        const tabNav = document.querySelector(`.tabs-nav a[data-tab="${tabId}"]`);
+                        if (tabNav) tabNav.closest("li").classList.add("active");
+                    }
+
+                    // Scroll to the first invalid field
+                    scrollToField(firstInvalid);
+                }
+            }
+        });
+    });
+
+});
 </script>
+
+
 <script>
 function toggleLanguageFields(langValue) {
     console.log('Toggling language fields for:', langValue);
@@ -161,6 +233,28 @@ function toggleLanguageFields(langValue) {
             { data: 'action', orderable: false, searchable: false }
         ],
     });
+		    jQuery('#vendorsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ url('admin/vendors/ajax') }}",
+            type: 'GET',
+			error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
+        },
+        columns: [
+			        { data: 'select', orderable: false, searchable: false },
+
+            { data: 'id', name: 'id' },
+            { data: 'email', name: 'email' },
+            { data: 'phone', name: 'phone' },
+            { data: 'status', name: 'status' },
+            { data: 'action', orderable: false, searchable: false }
+        ],
+    });
 	jQuery('#abandonedCart').DataTable({
             processing: true,
             serverSide: true,
@@ -180,7 +274,7 @@ $('#customersWallet').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
-        url: "{{ url('admin/customers/wallet-ajax') }}",
+        url: "{{ url('admin/customer-wallet-ajax') }}",
         type: 'GET',
     },
     columns: [
@@ -316,50 +410,67 @@ exportOptions: {
         }
     ]
 });
-const tableContact = $('#contactInquiries').DataTable({
+ const tableContact = $('#contactInquiries').DataTable({
     processing: true,
     serverSide: true,
-	lengthChange: true,
+    lengthChange: true,
     ajax: {
-        url: "{{ url('admin/contact-form-ajax') }}",
-        type: "GET"
+      url: "{{ url('admin/contact-form-ajax') }}",
+      type: "GET",
+	  error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
     },
     columns: [
-        { data: 'select', orderable: false, searchable: false },
-        { data: 'serial', name: 'serial', orderable: false, searchable: false },
-        { data: 'name', name: 'name' },
-        { data: 'email', name: 'email' },
-        { data: 'subject', name: 'subject' },
-        { data: 'message', name: 'message' },
+      { data: 'select', orderable: false, searchable: false },
+      { data: 'serial', name: 'serial', orderable: false, searchable: false },
+      { data: 'name', name: 'name' },
+      { data: 'email', name: 'email' },
+      { data: 'subject', name: 'subject' },
+      { data: 'message', name: 'message' },
+      @if(Auth::check() && Auth::user()->role_id != 4) 
         { data: 'support_category', name: 'support_category' },
-        { data: 'received_date', name: 'received_date' },
-        { data: 'action', orderable: false, searchable: false }
+      @endif
+      { data: 'received_date', name: 'received_date' },
+      { data: 'action', orderable: false, searchable: false }
     ],
     order: [[6, 'desc']],
     dom: 'Blfrtip',
 
     buttons: [
-        {
-            extend: 'csv',
-            filename: 'Contact Form',
-            text: 'Download CSV',
-            exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6]
-            },
-            className: 'custom-btn'
+      {
+        extend: 'csv',
+        filename: 'Contact Form',
+        text: 'Download CSV',
+        exportOptions: {
+          columns: [
+            1, 2, 3, 4, 5, 6, 
+                                                @if(Auth::check() && Auth::user()->role_id != 4)
+              7,
+            @endif
+          ]
         },
-        {
-            extend: 'pdf',
-            title: 'Contact Form Inquiries',
-            filename: 'Contact Form',
-            text: 'Download PDF',
-            exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6]
-            },
-            className: 'custom-btn'
-        }
+        className: 'custom-btn'
+      },
+      {
+        extend: 'pdf',
+        title: 'Contact Form Inquiries',
+        filename: 'Contact Form',
+        text: 'Download PDF',
+        exportOptions: {
+          columns: [
+            1, 2, 3, 4, 5, 6,
+                                                @if(Auth::check() && Auth::user()->role_id != 4)
+              7,
+            @endif
+          ]
+        },
+        className: 'custom-btn'
+      }
     ]
-});
+  });
 
 
 
@@ -374,6 +485,11 @@ const tableContact = $('#contactInquiries').DataTable({
         ajax: {
             url: "{{ url('admin/reviews-ajax') }}",
             type: 'GET',
+			error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        },
             data: function (d) {
                 d.length = $('#perPageSelect').val(); // pass custom per-page value
             }
@@ -406,7 +522,12 @@ const tableContact = $('#contactInquiries').DataTable({
             lengthChange: true,
             ajax: {
                 url: "{{ asset('admin/reports/sales-report-ajax') }}", 
-                type: 'GET'
+                type: 'GET',
+				error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
             },
             columns: [
              { data: 'ID', name: 'ID' },
@@ -567,7 +688,12 @@ const tableContact = $('#contactInquiries').DataTable({
             lengthChange: true,
             ajax: {
                 url: "{{ asset('admin/reports/out-stock-ajax') }}",
-                type: 'GET'
+                type: 'GET',
+				error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
             },
             columns: [
                 { data: 'ID', name: 'ID' },
@@ -597,7 +723,12 @@ const tableContact = $('#contactInquiries').DataTable({
             
             ajax: {
                 url: "{{ asset('admin/reports/low-stock-ajax') }}",
-                type: 'GET'
+                type: 'GET',
+				error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
             },
             columns: [
                 { data: 'ID', name: 'ID' },
@@ -625,7 +756,12 @@ const tableContact = $('#contactInquiries').DataTable({
             serverSide: true,
             ajax: {
                 url: "{{ asset('admin/reports/customers-total-ajax') }}", 
-                type: 'GET'
+                type: 'GET',
+				error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
             },
             columns: [
                 { data: 'name', name: 'name' },
@@ -642,7 +778,12 @@ const tableContact = $('#contactInquiries').DataTable({
         serverSide: true,
         ajax: {
             url: "{{ url('admin/orders/orders-ajax') }}",
-            type: 'GET'
+            type: 'GET',
+			error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
         },
         columns: [
             { data: 'id', name: 'id' },
@@ -853,7 +994,7 @@ const tableContact = $('#contactInquiries').DataTable({
 
 			let slug = jQuery(this).val().toLowerCase()
 
-			slug = slug.replace(/[^a-zA-Z ]/g, "");
+slug = slug.replace(/[^a-zA-Z0-9 ]/g, "");
 
 			slug = slug.split(' ');
 
@@ -1661,74 +1802,76 @@ if (window.location.pathname.endsWith('/admin/media/add')) {
 
 			//Taxonomy Ajax Functions
 
-		jQuery('.js-form').submit(function(e) {
+		jQuery('.js-form').on('submit', function(e) {
 
-			let dis = jQuery(this)
+    e.preventDefault();
 
-			dis.find('button').attr('disabled','true')
+    const form = jQuery(this);
+    const url = form.attr('action');
+    const token = form.find('input[name="_token"]').val();
+    const data = new FormData(form[0]);
 
-			e.preventDefault()
+    // Validation
+    let hasError = false;
+    let firstInvalid = null;
 
-			let parent = jQuery(this)
+    form.find(".required").each(function() {
+        if (!validateField(this)) {
+            hasError = true;
+            if (!firstInvalid) firstInvalid = this;
+        }
+    });
 
-			let url = parent.attr('action')
+    if (hasError) {
+        scrollToField(firstInvalid);
+        return;
+    }
 
-			let token = parent.find('input[name="_token"]').val()
+    form.find("button[type=submit]").attr('disabled', true);
 
-			let data = new FormData( parent[0] )
+    jQuery.ajax({
+        type: 'POST',
+        url: url,
+        headers: { 'X-CSRF-TOKEN': token },
+        data: data,
+        cache: false,
+        processData: false,
+        contentType: false,
 
-			let count = 0
+        success: function(response) {
 
-			jQuery.ajax({
+            if (url.includes('/admin/category/create') || url.includes('/admin/taxonomy/create')) {
+                window.location.reload();
+                return;
+            }
 
-				type: 'POST',
+            jQuery('.replace-table').html(response);
 
-				url : url,
+            // Reset form fields
+            form[0].reset();
 
-				headers: {'X-CSRF-TOKEN': token },
+            // Reset Select2 properly
+            $('.select2').val(null).trigger('change');
 
-				data:data,
+            // Reset images
+            jQuery('.featuredWrap img').addClass('d-none');
+            jQuery('.featuredWrap').removeClass('featured');
 
-				cache: false,
+            // Re-init DataTable
+            if ($.fn.DataTable.isDataTable('#example1')) {
+                $('#example1').DataTable().destroy();
+            }
+            $('#example1').DataTable({ order: [], paging: false, info: false });
 
-				processData: false,
+            form.find('button').prop('disabled', false);
+        },
 
-				contentType: false,
+        error: function() {
+            form.find('button').prop('disabled', false);
+        }
+    });
 
-				success: function (response) {
-if(url == '{{ url('admin/category/create') }}'){
-	window.location.reload();
-}else if(url == '{{ url('admin/taxonomy/create') }}'){
-		window.location.reload();
-
-}
-					jQuery('.replace-table').html(response)
-
-					jQuery('.form-control').val('')
-
-					jQuery('#size_image').val('')
-
-					jQuery('.featuredWrap img').addClass('d-none')
-
-					jQuery('.select2-selection__rendered').text('None')
-
-					jQuery('.featuredWrap').removeClass('featured')
-
-					dis.find('button').removeAttr('disabled')
-
-					jQuery('#example1').DataTable({order: [],"bPaginate": false,bInfo:false});
-
-				},
-
-				error:function(response) {
-
-					dis.find('button').removeAttr('disabled')
-
-				}
-
-			})	
-
-		})
+});
 
 
 		jQuery('body').delegate('.show-children','click',function() {
@@ -1914,9 +2057,22 @@ if(url == '{{ url('admin/category/create') }}'){
 							}
 
 						}
+let fieldKey = jQuery(this).attr('key');
+
+let form = jQuery('.fields-view').find('form[data-id="#' + fieldKey + '"]');
+let isRequired = 0;
+
+if (form.length) {
+    isRequired = parseInt(form.find('[name="is_required"]').val() || 0);
+}
+
+fields['is_required'] = isRequired;
+
+
 
 						sections[i].data[j] = fields
-
+console.log('all fields cpmes here');
+						console.log(fields);
 					}
 
 					if(check.length != 0){
@@ -2689,16 +2845,16 @@ jQuery('body').on('click', '.row-select', function () {
 		})
 
 
-		jQuery('body').delegate('.regular','blur',function() {
+		// jQuery('body').delegate('.regular','blur',function() {
 
-			jQuery(this).parents('.pdata').find('.sale').attr('max',jQuery(this).val())
+		// 	jQuery(this).parents('.pdata').find('.sale').attr('max',jQuery(this).val())
 
-			if( jQuery(this).parents('.pdata').find('.sale').val() > jQuery(this).val() ){
+		// 	if( jQuery(this).parents('.pdata').find('.sale').val() > jQuery(this).val() ){
 
-				jQuery(this).parents('.pdata').find('.sale').val(jQuery(this).val())
-			}
+		// 		jQuery(this).parents('.pdata').find('.sale').val(jQuery(this).val())
+		// 	}
 
-		})
+		// })
 
 		jQuery('body').delegate('.sale','blur',function() {
 
@@ -3040,8 +3196,13 @@ document.getElementById('analytics').addEventListener('click', function() {
     lengthChange: true,
 	order: [],
     ajax: {
-        url: "{{ asset('admin/page/ajax') }}", // URL to get the pages data from the controller
-        type: 'GET'
+        url: "{{ asset('admin/page/ajax') }}",
+        type: 'GET',
+		error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        }
     },
     columns: [
        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
@@ -3098,6 +3259,11 @@ $(document).ready(function() {
     // rowId: 'id', // gives <tr id="123">
     ajax: {
         url: '{{ url("admin/posts-ajax") }}',
+		error: function(xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location = "{{ asset('admin/login') }}";
+            }
+        },
         data: function(d) {
             d.post_type = '{{ $data['post_type']['type'] }}';
         }
@@ -3278,3 +3444,82 @@ function dragAfterElement(container, y) {
 	});
 </script>
 
+<script>
+    function validateField(field) {
+
+        removeOldError(field);
+
+        let value = field.value.trim();
+
+        if (field.classList.contains("quilleditor") && typeof CKEDITOR !== "undefined") {
+            let instance = CKEDITOR.instances[field.name];
+            if (instance) {
+                value = instance.getData().trim();
+            }
+        }
+
+        if (!value) {
+            insertError(field, "This field is required.");
+            return false;
+        }
+
+        return true;
+    }
+
+
+function insertError(field, message) {
+    let error = document.createElement("div");
+    error.classList.add("error-message");
+    error.style.color = "red";
+    error.textContent = message;
+
+    // If the field has a "featured" button above it
+    let featuredWrap = field.closest(".featuredWrap");
+    if (featuredWrap) {
+        // Insert error after the entire featuredWrap container
+        featuredWrap.insertAdjacentElement("afterend", error);
+    } else if (field.classList.contains("quilleditor")) {
+        // Special handling for quill editors
+        let editorWrapper = field.closest(".form-group").querySelector(".cke");
+        if (editorWrapper) {
+            editorWrapper.insertAdjacentElement("afterend", error);
+        }
+    } else {
+        // Default: insert after the input field
+        field.insertAdjacentElement("afterend", error);
+    }
+
+    setTimeout(() => {
+        error.remove();
+    }, 2000);
+}
+
+
+
+    function removeOldError(field) {
+        if (field.nextElementSibling && field.nextElementSibling.classList.contains("error-message")) {
+            field.nextElementSibling.remove();
+        }
+
+        let formGroup = field.closest(".form-group");
+        if (formGroup) {
+            let editorError = formGroup.querySelector(".error-message");
+            if (editorError) editorError.remove();
+        }
+    }
+
+    function scrollToField(field) {
+        let target = field;
+        if (field.classList.contains("quilleditor")) {
+            let editorWrapper = field.closest(".form-group").querySelector(".cke");
+            if (editorWrapper) target = editorWrapper;
+        }
+
+        target.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        target.focus();
+    }	
+</script>

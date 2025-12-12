@@ -104,11 +104,11 @@ if( !$data['wishlist'] || empty( $data['wishlist']['items'] ) ): ?>
 								<?php $id = Auth::check() ? 'AddToCartAll' : 'AddToCartAll';?>
 								<?php $ic = Auth::check() ? 'add-to-cart-multi' : 'add-to-cart-multi';?>
 
-								<a href="javascript:;" class="select-all btn" id="<?=$id?>">Add all to Cart</a>					
+								<a href="javascript:;" class="select-all btn" id="<?=$id?>"><?=App\Http\Controllers\Web\IndexController::trans_labels('Add all to Cart')?></a>					
 
 								<div class="d-flex gap-4">
 
-									<button href="javascript:;" class="<?=$ic?> btn trans-btn" style="display: none">Add selected to Cart</button>
+									<button href="javascript:;" class="<?=$ic?> btn trans-btn" style="display: none"><?=App\Http\Controllers\Web\IndexController::trans_labels('Add selected to Cart')?></button>
 
 									<div class="child_option position-relative">
 
@@ -118,7 +118,7 @@ if( !$data['wishlist'] || empty( $data['wishlist']['items'] ) ): ?>
 
 											<ul class="careerFilterInr">
 
-												<li><a href="javascript:;" class="empty-wishlist">Delete All</a></li>
+												<li><a href="javascript:;" class="empty-wishlist"><?=App\Http\Controllers\Web\IndexController::trans_labels('Delete All')?></a></li>
 
 											</ul>
 
@@ -243,7 +243,7 @@ if( !$data['wishlist'] || empty( $data['wishlist']['items'] ) ): ?>
 
 							                                    <?php endif;?>
 
-																	<p>Added On: <?=$item['product']['created_at']?></p>
+																	<p><?=App\Http\Controllers\Web\IndexController::trans_labels('Added On')?>: <?=$item['product']['created_at']?></p>
 
 
 																</div>
@@ -258,7 +258,7 @@ if( !$data['wishlist'] || empty( $data['wishlist']['items'] ) ): ?>
 
 														<li class="cart-item-totals">
 
-															<span class="d-block">Total</span>
+															<span class="d-block"><?=App\Http\Controllers\Web\IndexController::trans_labels('Total')?></span>
 
 															<?php $price = $item['product']['price'] * session('currency_value');?>
 
@@ -320,66 +320,17 @@ if( !$data['wishlist'] || empty( $data['wishlist']['items'] ) ): ?>
 					</div>
 					</div>
 
-					<div class="col-lg-3">
+					<div class="col-lg-3 section-slider account-section section-slider-pro">
 
 						<h4> <?=App\Http\Controllers\Web\IndexController::trans_labels('Related Products')?></h4>
+<?php
 
-						<div class="section-slider section-slider-pro mt-3 d-flex flex-column gap-4 m-0">
-										<div class="product-card m-0 overflow-hidden">
-
-								<figure class="d-flex justify-content-center align-items-center overflow-hidden">
+				foreach( $data['products'] as $product ) : ?>
 
 
-									<a href="https://v5.digitalsetgo.com/gift-kingdom/public/product/mubkhar-violet-all-over-eau-de">
+						@include('web.product.content',['product' => $product])
 
-										<img src="https://v5.digitalsetgo.com/gift-kingdom/public/images/media/2025/02/sec3Img3.webp" alt="*" class="wow">
-									</a>
-									<div class="position-absolute bottom-0 left-0 right-0 w-100 shop-now px-3 py-2">
-										<?php $c = Auth::check() ? 'add-to-cart' : '';?>
-
-										<a href="javascript:;" class="<?=$c?> d-flex align-items-center gap-3 justify-content-between text-white" data-product="3">
-											Add to Cart <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1V13M13 7H1" stroke="#F1F6D3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-										</a>
-
-									</div>
-								</figure>
-
-								<article class="text-center pt-3 wow fadeInUp">
-
-									<h5 title="Mubkhar Violet All Over Eau De">Mubkhar Violet All Over Eau De</h5>
-
-									<i class="d-block">AED  200</i>
-
-								</article>
-
-							</div>
-										<div class="product-card m-0 overflow-hidden">
-
-								<figure class="d-flex justify-content-center align-items-center overflow-hidden">
-
-									<a href="https://v5.digitalsetgo.com/gift-kingdom/public/product/melosa-david-white-candle">
-
-										<img src="https://v5.digitalsetgo.com/gift-kingdom/public/images/media/2025/02/sec3Img4.webp" alt="*" class="wow">
-									</a>
-									<div class="position-absolute bottom-0 left-0 right-0 w-100 shop-now px-3 py-2">
-
-										<a href="javascript:;" class="<?=$c?> d-flex align-items-center gap-3 justify-content-between text-white" data-product="4">
-											Add to Cart <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1V13M13 7H1" stroke="#F1F6D3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-										</a>
-
-									</div>
-								</figure>
-
-								<article class="text-center pt-3 wow fadeInUp">
-
-									<h5 title="Melosa David White Candle">Melosa David White Candle</h5>
-
-									<i class="d-block">AED  200</i>
-
-								</article>
-
-							</div>
-					</div>
+				<?php endforeach;?>
 
 				</div>
 

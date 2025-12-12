@@ -51,6 +51,7 @@ $data['content'] = IndexController::parseContent($content->toArray());
 		endif;
 
 		$title = ['title' => 'Wishlist' ];
+			$data['products'] = \App\Models\Web\Products::getRandom();
 
 		$view = (Route::current()->uri == 'account/wishlist') ? 'account.wishlist' : 'wishlist';
 
@@ -60,7 +61,6 @@ $data['content'] = IndexController::parseContent($content->toArray());
 
 
 	public function addOrRemove(Request $request){
-
 		$response = Wishlist::addOrRemove($request->all());
 
 		return json_encode(['message' => $response['message'],'count' => $response['count']]);
