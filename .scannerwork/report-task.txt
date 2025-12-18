@@ -2,5 +2,5 @@ projectKey=Gift-Kingdom
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
 dashboardUrl=http://localhost:9000/dashboard?id=Gift-Kingdom
-ceTaskId=8b205e85-41b1-4c74-bf08-2e2fbb7bfe70
-ceTaskUrl=http://localhost:9000/api/ce/task?id=8b205e85-41b1-4c74-bf08-2e2fbb7bfe70
+ceTaskId=28aad95d-9e92-4007-836d-f09bed40ab11
+ceTaskUrl=http://localhost:9000/api/ce/task?id=28aad95d-9e92-4007-836d-f09bed40ab11
