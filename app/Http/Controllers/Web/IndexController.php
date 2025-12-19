@@ -154,25 +154,25 @@ class IndexController extends Controller
     public function renderPage(Request $request)
     {
 
-$slug = Route::current()->uri();
+        $slug = Route::current()->uri();
 
-$page = Pages::where('slug', $slug)->first();
+        $page = Pages::where('slug', $slug)->first();
 
-$lang = session()->has('lang_id') ? session('lang_id') : 1;
+        $lang = session()->has('lang_id') ? session('lang_id') : 1;
 
-$content = Content::where([
-    ['page_id', $page->page_id],
-    ['lang', $lang]
-])->get();
+        $content = Content::where([
+            ['page_id', $page->page_id],
+            ['lang', $lang]
+        ])->get();
 
-if ($content->isEmpty() && $lang != 1) {
-    $content = Content::where([
-        ['page_id', $page->page_id],
-        ['lang', 1]
-    ])->get();
-}
+        if ($content->isEmpty() && $lang != 1) {
+            $content = Content::where([
+                ['page_id', $page->page_id],
+                ['lang', 1]
+            ])->get();
+        }
 
-$data['content'] = self::parseContent($content->toArray());
+        $data['content'] = self::parseContent($content->toArray());
 
 
         if ($slug == 'our-blogs') :
@@ -291,22 +291,22 @@ $data['content'] = self::parseContent($content->toArray());
     public function checkout()
     {
 
-$page = Pages::where('slug', 'checkout')->first();
-$lang = session()->get('lang_id', 1);
+        $page = Pages::where('slug', 'checkout')->first();
+        $lang = session()->get('lang_id', 1);
 
-// Try to get content for the current language
-$content = Content::where('page_id', $page->page_id)
-                  ->where('lang', $lang)
-                  ->get();
+        // Try to get content for the current language
+        $content = Content::where('page_id', $page->page_id)
+            ->where('lang', $lang)
+            ->get();
 
-// Fallback to default language if none found
-if ($content->isEmpty() && $lang != 1) {
-    $content = Content::where('page_id', $page->page_id)
-                      ->where('lang', 1)
-                      ->get();
-}
+        // Fallback to default language if none found
+        if ($content->isEmpty() && $lang != 1) {
+            $content = Content::where('page_id', $page->page_id)
+                ->where('lang', 1)
+                ->get();
+        }
 
-$content = $content->toArray();
+        $content = $content->toArray();
 
 
         Cart::updateCart();
@@ -500,7 +500,6 @@ $content = $content->toArray();
 
     public  function mailchimpRequest(Request $request)
     {
-
         if (isset($request['subscribe'])) :
 
             $apiKey = '9fabe37decd9c4cb42ef06b5776e86f8-us13';
@@ -781,22 +780,22 @@ $content = $content->toArray();
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-$pageData = Pages::where('slug', 'notifications')->first();
-$lang = session()->get('lang_id', 1);
+        $pageData = Pages::where('slug', 'notifications')->first();
+        $lang = session()->get('lang_id', 1);
 
-$content = Content::where([
-    ['page_id', $pageData->page_id],
-    ['lang', $lang]
-])->get();
+        $content = Content::where([
+            ['page_id', $pageData->page_id],
+            ['lang', $lang]
+        ])->get();
 
-if ($content->isEmpty() && $lang != 1) {
-    $content = Content::where([
-        ['page_id', $pageData->page_id],
-        ['lang', 1]
-    ])->get();
-}
+        if ($content->isEmpty() && $lang != 1) {
+            $content = Content::where([
+                ['page_id', $pageData->page_id],
+                ['lang', 1]
+            ])->get();
+        }
 
-$data['content'] = self::parseContent($content->toArray());
+        $data['content'] = self::parseContent($content->toArray());
 
 
         return view("web.notifications", [
@@ -825,107 +824,105 @@ $data['content'] = self::parseContent($content->toArray());
         return response()->json(['message' => 'Notifications marked as read.']);
     }
 
-public function getSavedCartitemAddresses(Request $request)
-{
-    $cartItemAddress = \App\Models\Core\CartItemAddress::query()
-        ->where('label', $request->label)
-        ->where('product_id', $request->product_id)
-        ->where('cart_item_id', $request->cart_item_id)
-        ->first();
+    public function getSavedCartitemAddresses(Request $request)
+    {
+        $cartItemAddress = \App\Models\Core\CartItemAddress::query()
+            ->where('label', $request->label)
+            ->where('product_id', $request->product_id)
+            ->where('cart_item_id', $request->cart_item_id)
+            ->first();
 
-    if ($cartItemAddress) {
+        if ($cartItemAddress) {
+            return response()->json([
+                'success' => true,
+                'data' => $cartItemAddress
+            ]);
+        }
+
         return response()->json([
-            'success' => true,
-            'data' => $cartItemAddress
+            'success' => false,
+            'data' => null
         ]);
     }
+    public function storeDetail(Request $request)
+    {
 
-    return response()->json([
-        'success' => false,
-        'data' => null
-    ]);
-}
-    public function storeDetail(Request $request){
-
-        $id = Usermeta::where([['meta_key','store_name'],['meta_value',$request->storename]])->pluck('user_id')->first();
+        $id = Usermeta::where([['meta_key', 'store_name'], ['meta_value', $request->storename]])->pluck('user_id')->first();
         $data['user'] = Users::getUserData($id);
         $data['store'] = Users::getUserData($id);
 
         $data['rand-products'] = Products::getStoreProducts($id);
 
-        return view("web.store-details", ['title' => 'Home'])->with('data',$data);
+        return view("web.store-details", ['title' => 'Home'])->with('data', $data);
     }
 
-public function stores(Request $request)
-{
-    $pageData = Pages::where('slug', 'stores')->first();
-$lang = session()->get('lang_id', 1);
+    public function stores(Request $request)
+    {
+        $pageData = Pages::where('slug', 'stores')->first();
+        $lang = session()->get('lang_id', 1);
 
-$content = Content::where([
-    ['page_id', $pageData->page_id],
-    ['lang', $lang]
-])->get();
+        $content = Content::where([
+            ['page_id', $pageData->page_id],
+            ['lang', $lang]
+        ])->get();
 
-if ($content->isEmpty() && $lang != 1) {
-    $content = Content::where([
-        ['page_id', $pageData->page_id],
-        ['lang', 1]
-    ])->get();
-}
+        if ($content->isEmpty() && $lang != 1) {
+            $content = Content::where([
+                ['page_id', $pageData->page_id],
+                ['lang', 1]
+            ])->get();
+        }
 
-$data['content'] = self::parseContent($content->toArray());
-    $query = Users::where('role_id', 4);
+        $data['content'] = self::parseContent($content->toArray());
+        $query = Users::where('role_id', 4);
 
-    $approvedVendors = Usermeta::where('meta_key', 'approved')
-        ->where('meta_value', '1')
-        ->pluck('user_id')
-        ->toArray();
-
-    $query->whereIn('id', $approvedVendors);
-
-    if ($request->filled('search')) {
-        $searchedIds = Usermeta::where('meta_key', 'store_name')
-            ->where('meta_value', 'like', '%' . $request->search . '%')
+        $approvedVendors = Usermeta::where('meta_key', 'approved')
+            ->where('meta_value', '1')
             ->pluck('user_id')
             ->toArray();
 
-        $query->whereIn('id', $searchedIds);
-    }
+        $query->whereIn('id', $approvedVendors);
 
-    $vendors = $query->paginate(12);
+        if ($request->filled('search')) {
+            $searchedIds = Usermeta::where('meta_key', 'store_name')
+                ->where('meta_value', 'like', '%' . $request->search . '%')
+                ->pluck('user_id')
+                ->toArray();
 
-    $data['stores'] = [];
-    foreach ($vendors as $vendor) {
-        $userData = Users::getUserData($vendor->id);
-
-        if (
-            empty($userData['metadata']['store_name']) ||
-            ($userData['metadata']['approved'] ?? 0) != 1
-        ) {
-            continue;
+            $query->whereIn('id', $searchedIds);
         }
 
-        $data['stores'][] = $userData;
+        $vendors = $query->paginate(12);
+
+        $data['stores'] = [];
+        foreach ($vendors as $vendor) {
+            $userData = Users::getUserData($vendor->id);
+
+            if (
+                empty($userData['metadata']['store_name']) ||
+                ($userData['metadata']['approved'] ?? 0) != 1
+            ) {
+                continue;
+            }
+
+            $data['stores'][] = $userData;
+        }
+
+        $result = [
+            'total' => $vendors->total(),
+            'per_page' => $vendors->perPage(),
+            'links' => $vendors->linkCollection()->toArray(),
+        ];
+
+        if ($request->ajax()) {
+            $html = view('web.partials.store_results', compact('data', 'result'))->render();
+            return response()->json(['html' => $html]);
+        }
+
+        return view('web.stores', [
+            'title' => 'Stores',
+            'data' => $data,
+            'result' => $result
+        ]);
     }
-
-    $result = [
-        'total' => $vendors->total(),
-        'per_page' => $vendors->perPage(),
-        'links' => $vendors->linkCollection()->toArray(),
-    ];
-
-    if ($request->ajax()) {
-        $html = view('web.partials.store_results', compact('data', 'result'))->render();
-        return response()->json(['html' => $html]);
-    }
-
-    return view('web.stores', [
-        'title' => 'Stores',
-        'data' => $data,
-        'result' => $result
-    ]);
-}
-
-
-
 }
