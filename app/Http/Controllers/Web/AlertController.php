@@ -3,77 +3,64 @@
 namespace App\Http\Controllers\Web;
 
 use Validator;
-
 use Mail;
-
 use DB;
-
 use Hash;
-
 use Auth;
-
 use Illuminate\Foundation\Auth\ThrottlesLogins;
-
 use Lang;
-
 use Illuminate\Http\Request;
-
 use Illuminate\Routing\Controller;
-
 use Carbon;
-
 use App\Models\Web\Alert;
 
 class AlertController extends Controller
 
 {
-	public function userDevice($customers_id){
+	public function userDevice($customers_id)
+	{
 
 		$alert = new Alert();
 
 		$device = $alert->getUserDevices($customers_id);
 
-		if(count($device)>0){
+		if (count($device) > 0) {
 
 			return $device[0]->device_id;
-
-		}
-
-		else{
+		} else {
 
 			return '';
-
 		}
-
 	}
 
 	//alert Setting
 
-	public function getAlertSetting(){
+	public function getAlertSetting()
+	{
 
 		$alert = new Alert();
 
 		$setting = $alert->getAlertSetting();
 
 		return $setting;
-
 	}
 
 	//alert Setting
 
-	public function setting(){
+	public function setting()
+	{
 
 		$alert = new Alert();
 
 		$setting = $alert->setting();
 
 		return $setting;
-
 	}
 
 	//listingDevices
 
-	public function createUserAlert($existUser){
+	public function createUserAlert($existUser)
+	{
 
 		//alert setting
 
@@ -85,17 +72,16 @@ class AlertController extends Controller
 
 		$existUser[0]->app_name = $setting[18]->value;
 
-		if($alertSetting[0]->create_customer_email==1 and !empty($existUser[0]->email)){
+		if ($alertSetting[0]->create_customer_email == 1 and !empty($existUser[0]->email)) {
 
-			Mail::send('/mail/createAccount', ['userData' => $existUser], function($m) use ($existUser){
+			Mail::send('/mail/createAccount', ['userData' => $existUser], function ($m) use ($existUser) {
 
 				$m->to($existUser[0]->email)->subject('BlingBlingSabaya')->getSwiftMessage()
 
-				->getHeaders()
+					->getHeaders()
 
-				->addTextHeader('x-mailgun-native-send', 'true');
+					->addTextHeader('x-mailgun-native-send', 'true');
 			});
-
 		}
 
 		// if($alertSetting[0]->create_customer_notification==1){
@@ -147,7 +133,8 @@ class AlertController extends Controller
 
 	//orderAlert
 
-	public function orderAlert($ordersData){
+	public function orderAlert($ordersData)
+	{
 
 		$alertSetting = $this->getAlertSetting();
 
@@ -155,89 +142,82 @@ class AlertController extends Controller
 
 		$ordersData['app_name'] = $setting[18]->value;
 		$ordersData['orders_data'][0]->admin_email = $setting[70]->value;
-		
+
 		$customer_info = DB::table('users')
-		->where('users.id' , $ordersData['orders_data'][0]->customers_id)
-		->first();
-		$ordersData['orders_data'][0]->customer=$customer_info;
+			->where('users.id', $ordersData['orders_data'][0]->customers_id)
+			->first();
+		$ordersData['orders_data'][0]->customer = $customer_info;
 
 		$shipping_info = DB::table('zones')
-		->leftJoin('countries' , 'countries.countries_id' ,'=' , 'zones.zone_country_id')
-		->where('zones.zone_id' , $ordersData['orders_data'][0]->billing_city)
-		->first();
+			->leftJoin('countries', 'countries.countries_id', '=', 'zones.zone_country_id')
+			->where('zones.zone_id', $ordersData['orders_data'][0]->billing_city)
+			->first();
 
-		$ordersData['orders_data'][0]->shipping_info=$shipping_info;
+		$ordersData['orders_data'][0]->shipping_info = $shipping_info;
 
 		// echo view("mail.orderEmail")->with('ordersData', $ordersData)->with('settings' , $setting); exit;
 
-		if($alertSetting[0]->order_email==1){
-			if(!empty($ordersData['orders_data'][0]->email)){
-				
-				$headers = "MIME-Version: 1.0" . "\r\n"; 
+		if ($alertSetting[0]->order_email == 1) {
+			if (!empty($ordersData['orders_data'][0]->email)) {
+
+				$headers = "MIME-Version: 1.0" . "\r\n";
 				$headers .= 'From: Your name <info@address.com>' . "\r\n";
-				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";  
+				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
-				mail($ordersData['orders_data'][0]->email,'BlingBling Sabaya: An order has been placed',view("mail.orderEmail")->with('ordersData', $ordersData)->with('settings' , $setting),$headers);
-
+				mail($ordersData['orders_data'][0]->email, 'BlingBling Sabaya: An order has been placed', view("mail.orderEmail")->with('ordersData', $ordersData)->with('settings', $setting), $headers);
 			}
 
 
-		// 	if(!empty($ordersData['orders_data'][0]->admin_email)){
+			// 	if(!empty($ordersData['orders_data'][0]->admin_email)){
 
-		// 			$headers = "MIME-Version: 1.0" . "\r\n"; 
-        // $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n"; 
-        // mail($ordersData['orders_data'][0]->admin_email,Lang::get("BlingBling Sabaya: An order has been placed"),view("mail.orderEmail")->with('ordersData', $ordersData),$headers);
+			// 			$headers = "MIME-Version: 1.0" . "\r\n"; 
+			// $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n"; 
+			// mail($ordersData['orders_data'][0]->admin_email,Lang::get("BlingBling Sabaya: An order has been placed"),view("mail.orderEmail")->with('ordersData', $ordersData),$headers);
 
 
-		// 	}
+			// 	}
 
 		}
 
-		if($alertSetting[0]->order_notification==1){
+		if ($alertSetting[0]->order_notification == 1) {
 
 			$title = Lang::get("labels.OrderTitle");
 
-			$message = Lang::get("labels.OrderDetail").$setting[18]->value;
+			$message = Lang::get("labels.OrderDetail") . $setting[18]->value;
 
-			$sendData = array
-
-			(
+			$sendData = array(
 
 				'body' 	=> $message,
-				'title'	=> $title ,
+				'title'	=> $title,
 				'icon'	=> 'myicon',/*Default Icon*/
 				'sound' => 'mySound',/*Default sound*/
 				'image' => '',
 			);
 
-			if($setting[54]->value=='fcm'){
+			if ($setting[54]->value == 'fcm') {
 
 				$functionName = 'fcmNotification';
-
-			}elseif($setting[54]->value=='onesignal'){
+			} elseif ($setting[54]->value == 'onesignal') {
 
 				$functionName = 'onesignalNotification';
-
 			}
 
 			//get device id
 
 			$device_id = $this->userDevice($ordersData['orders_data'][0]->customers_id);
 
-			if(!empty($device_id)){
+			if (!empty($device_id)) {
 
 				$response = $this->$functionName($device_id, $sendData);
-
 			}
-
 		}
-
 	}
 
 	//listingDevices
 
-	public function forgotPasswordAlert($existUser){
-		
+	public function forgotPasswordAlert($existUser)
+	{
+
 		//alert setting
 
 		$alertSetting = $this->getAlertSetting();
@@ -247,7 +227,7 @@ class AlertController extends Controller
 
 		$existUser[0]->app_name = $setting[18]->value;
 
-		if($alertSetting[0]->forgot_email==1 and !empty($existUser[0]->email)){
+		if ($alertSetting[0]->forgot_email == 1 and !empty($existUser[0]->email)) {
 
 			// Mail::send('/mail/recoverPassword', ['existUser' => $existUser], function($m) use ($existUser){
 
@@ -259,25 +239,22 @@ class AlertController extends Controller
 
 			// });
 
-			$headers = "MIME-Version: 1.0" . "\r\n"; 
-			$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n"; 
-			mail($existUser[0]->email,'Password Recovery',view("mail.recoverPassword")->with('existUser', $existUser),$headers);
-
+			$headers = "MIME-Version: 1.0" . "\r\n";
+			$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+			mail($existUser[0]->email, 'Password Recovery', view("mail.recoverPassword")->with('existUser', $existUser), $headers);
 		}
 
-		if($alertSetting[0]->forgot_notification==1){
+		if ($alertSetting[0]->forgot_notification == 1) {
 
 			$title = Lang::get("labels.forgotNotificationTitle");
 
 			$message = Lang::get("labels.forgotNotificationMessage");
 
-			$sendData = array
-
-			(
+			$sendData = array(
 
 				'body' 	=> $message,
 
-				'title'	=> $title ,
+				'title'	=> $title,
 
 				'icon'	=> 'myicon',/*Default Icon*/
 
@@ -287,30 +264,26 @@ class AlertController extends Controller
 
 			);
 
-			if($setting[54]->value=='fcm'){
+			if ($setting[54]->value == 'fcm') {
 
 				$functionName = 'fcmNotification';
-
-			}elseif($setting[54]->value=='onesignal'){
+			} elseif ($setting[54]->value == 'onesignal') {
 
 				$functionName = 'onesignalNotification';
-
 			}
 			//get device id
 
 			$device_id = $this->userDevice($existUser[0]->id);
 
-			if(!empty($device_id)){
+			if (!empty($device_id)) {
 
 				$response = $this->$functionName($device_id, $sendData);
-
 			}
-
 		}
-
 	}
 
-	public function fcmNotification($device_id, $sendData){
+	public function fcmNotification($device_id, $sendData)
+	{
 
 		//get function from other controller
 
@@ -318,21 +291,17 @@ class AlertController extends Controller
 
 		#API access key from Google API's Console
 
-		if (!defined('API_ACCESS_KEY')){
+		if (!defined('API_ACCESS_KEY')) {
 
 			define('API_ACCESS_KEY', $setting[12]->value);
 		}
 
-		$fields = array
-
-		(
+		$fields = array(
 			'to'		=> $device_id,
 			'data'	=> $sendData
 		);
 
-		$headers = array
-
-		(
+		$headers = array(
 
 			'Authorization: key=' . API_ACCESS_KEY,
 
@@ -344,23 +313,23 @@ class AlertController extends Controller
 
 		$ch = curl_init();
 
-		curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );
+		curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
 
-		curl_setopt( $ch,CURLOPT_POST, true );
+		curl_setopt($ch, CURLOPT_POST, true);
 
-		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, true );
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
-		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $fields ) );
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
 
 		$result = curl_exec($ch);
 
 		$data = json_decode($result);
 
-		if($result === false)
+		if ($result === false)
 
 			die('Curl failed ' . curl_error());
 
@@ -370,14 +339,12 @@ class AlertController extends Controller
 
 
 
-		if(!empty($data->success) and $data->success >= 1){
+		if (!empty($data->success) and $data->success >= 1) {
 
 			$response = '1';
-
-		}else{
+		} else {
 
 			$response = '0';
-
 		}
 
 		//print $response;
@@ -385,7 +352,8 @@ class AlertController extends Controller
 	}
 
 
-	public function onesignalNotification($device_id, $sendData){
+	public function onesignalNotification($device_id, $sendData)
+	{
 
 		//get function from other controller
 
@@ -417,9 +385,9 @@ class AlertController extends Controller
 
 			'contents' => $content,
 
-			'headings'=>$headings,
+			'headings' => $headings,
 
-			'big_picture'=>$sendData['image']
+			'big_picture' => $sendData['image']
 
 		);
 
@@ -430,9 +398,11 @@ class AlertController extends Controller
 
 		curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
 
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json; charset=utf-8',
 
-			'Authorization: Basic ZTJhZTcwNzItODQ4Ni00Y2FiLWFjZjEtMGY4ODZhZGZlMGZl'));
+			'Authorization: Basic ZTJhZTcwNzItODQ4Ni00Y2FiLWFjZjEtMGY4ODZhZGZlMGZl'
+		));
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
@@ -454,14 +424,12 @@ class AlertController extends Controller
 
 
 
-		if(!empty($data->recipients) and $data->recipients >= 1){
+		if (!empty($data->recipients) and $data->recipients >= 1) {
 
 			$response = '1';
-
-		}else{
+		} else {
 
 			$response = '0';
-
 		}
 
 
@@ -471,8 +439,4 @@ class AlertController extends Controller
 
 
 	}
-
-
-
 }
-
